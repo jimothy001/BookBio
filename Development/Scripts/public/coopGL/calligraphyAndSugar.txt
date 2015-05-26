@@ -1,0 +1,18 @@
+o.o(obj)
+o.o(obj, prop)
+o.o(obj, prop, opt)
+
+app.o(obj)
+
+o.o(obj)
+o.shadow(obj)
+o.projection(obj, userid)
+
+o.s()
+o.p()
+
+o.pointer(o, _prop) //universal pointer
+o.o0(o, prop)
+o.pointer(o)   //
+
+o.ref(o)

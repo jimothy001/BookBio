@@ -1,0 +1,19 @@
+{
+  "name": "intro",
+  "description": "intro app",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "connect":"*",
+    "method-override":"*",
+    "body-parser":"*",
+    "serve-static":"*",
+    "finalhandler":"*",
+    "errorhandler":"*",
+    "routes":"*",
+    "socket.io" :"*",
+    "mongodb": "*",
+    "node-geocoder": "*",
+    "gl-matrix-mat4":"*"
+  }
+}

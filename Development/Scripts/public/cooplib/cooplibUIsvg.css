@@ -1,0 +1,156 @@
+.svgcore{
+position:absolute;
+	z-index:100;
+pointer-events:none;
+}
+
+
+.svguicontrol{
+	fill: #ffffff;
+	fill-opacity: 0.3;
+  	/*stroke: #000000;
+	stroke-width: 0.5;*/
+	cursor:pointer;
+
+	-webkit-user-select: none;
+-khtml-user-select: none;
+-moz-user-select: none;
+-o-user-select: none;
+user-select: none;
+pointer-events:fill;
+}
+
+.svguigroup{
+	fill: #ffffff;
+	fill-opacity: 0.1;
+  	stroke: #000000;
+	stroke-width: 0.5;
+
+	-webkit-user-select: none;
+-khtml-user-select: none;
+-moz-user-select: none;
+-o-user-select: none;
+user-select: none;
+pointer-events:visible;
+}
+
+.svguitext{
+	fill: #000000;
+	fill-opacity: 1.0;
+  	/*stroke: #000000;
+	stroke-width: 0.0;*/
+	font-family: sans-serif;
+	font-size: 12px;
+	text-anchor:middle;
+	cursor:pointer;
+
+	-webkit-user-select: none;
+-khtml-user-select: none;
+-moz-user-select: none;
+-o-user-select: none;
+user-select: none;
+pointer-events:visible;
+}
+
+.svguilabel{
+	fill: #000000;
+	fill-opacity: 1.0;
+  	/*stroke: #000000;
+	stroke-width: 0.0;*/
+	font-family: "Courier";
+	font-size: 12px;
+	text-anchor:start;
+	cursor:default;
+
+	-webkit-user-select: none;
+-khtml-user-select: none;
+-moz-user-select: none;
+-o-user-select: none;
+user-select: none;
+pointer-events:visible;
+}
+
+
+.svguitextinput{
+	fill: #000000;
+	fill-opacity: 1.0;
+  	/*stroke: #000000;
+	stroke-width: 0.0;*/
+	font-family: "Helvetica";
+	font-size: 12px;
+	text-anchor:start;
+	pointer-events:visible;
+}
+
+.svguitextinputbg{
+	fill: #ff0000;
+	fill-opacity: 0.5;
+}
+
+.svguitextinputbgfocus{
+	fill: #00ff00;
+	fill-opacity: 0.5;
+}
+
+.svguigrouptext{
+	fill: #ffffff;
+	fill-opacity: 1.0;
+	font-family: sans-serif;
+	font-size: 10px;
+	text-anchor:left;
+	cursor:default;
+
+	-webkit-user-select: none;
+-khtml-user-select: none;
+-moz-user-select: none;
+-o-user-select: none;
+user-select: none;
+pointer-events:visible;
+}
+
+.svguiscrollbarlabel{
+	fill: #ffffff;
+	fill-opacity: 1.0;
+	font-family: sans-serif;
+	font-size: 10px;
+	text-anchor:left;
+	cursor:default;
+
+	-webkit-user-select: none;
+-khtml-user-select: none;
+-moz-user-select: none;
+-o-user-select: none;
+user-select: none;
+pointer-events:visible;
+}
+
+.svguiscrollbarvalue{
+	fill: #000000;
+	fill-opacity: 1.0;
+	font-family: sans-serif;
+	font-size: 8px;
+	text-anchor:left;
+	cursor:default;
+
+	-webkit-user-select: none;
+-khtml-user-select: none;
+-moz-user-select: none;
+-o-user-select: none;
+user-select: none;
+pointer-events:visible;
+}
+
+.svguiscrollbar{
+	fill: #ffffff;
+	fill-opacity: 0.8;
+  	/*stroke: #000000;
+	stroke-width: 0.5;*/
+	cursor:pointer;
+
+	-webkit-user-select: none;
+-khtml-user-select: none;
+-moz-user-select: none;
+-o-user-select: none;
+user-select: none;
+pointer-events:visible;
+}

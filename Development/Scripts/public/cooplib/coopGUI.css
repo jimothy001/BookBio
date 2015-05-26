@@ -1,0 +1,407 @@
+.UIControl{
+	font-family: Consolas, monaco, monospace;
+	font-size: 100%;
+    position:relative;    
+	background-color: transparent;
+	border: 0px solid #000000;
+	margin: 2px;
+	padding: 0px;
+	color:#000000;
+
+	cursor:default;
+
+	min-height: 15px;
+
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-o-user-select: none;
+	user-select: none;
+
+
+	-webkit-transition: all 0.25s linear;
+  	-moz-transition: all 0.25s linear;
+  	-o-transition: all 0.25s linear;
+  	transition: all 0.25s linear;
+
+  	overflow:hidden;
+}
+
+.UIContainer{
+	background-color: rgba(200,200,200,0.1);
+	-webkit-border-radius: 2px;
+  	-moz-border-radius: 2px;
+  	border-radius: 2px;
+}
+
+.UILabel {
+	border: 0px;
+	pointer-events:none;
+	float:left;
+	color: rgba(120,120,120,1.0);
+}
+
+
+.UIActiveLabel {
+	pointer-events:auto;
+	width:100%;
+	cursor:pointer;
+	color: rgba(0,0,0,1.0);
+}
+
+.UIActiveLabel:hover {
+	background-color: #ffffff;
+	color:#000000;
+	cursor:pointer;
+	color: rgba(0,0,0,1.0);
+}
+
+.UIActive {
+	/*border: 1px solid #000000;*/
+	cursor:pointer;
+}
+
+.UIActive:hover {
+	background-color: #ffffff;
+	color:#000000;
+}
+
+.UIStack {
+	border-top: 1px solid rgba(0,0,0,0.2);
+	border-bottom: 1px solid rgba(0,0,0,0.2);
+
+}
+/*
+.UIStack.UIControl {
+	width:100%;
+}*/
+
+.UICheckBox {
+	float:right;
+}
+
+.UITextInput {
+}
+
+.UITextInputBox {
+	font-family: Consolas, monaco, monospace;
+	font-size: 100%;
+	background-color: transparent;
+	color: #666666;
+	border: none;
+	width:100%;
+	
+	pointer-events:auto;
+	padding: 0px;
+	margin:0px;
+	/*margin-left: 10px;*/
+	outline: 0;
+}
+
+.UITextInputBox:focus {
+	background-color: #cccccc;
+}
+
+.UITextInputBox:hover {
+	background-color: #cccccc;
+}
+
+.UIClient {
+	overflow: auto;
+	-webkit-transition: all 0.35s linear;
+  	-moz-transition: all 0.35s linear;
+  	-o-transition: all 0.35s linear;
+  	transition: all 0.35s linear;
+}
+
+.UITable {
+	border:none;
+	padding: 0px;
+	margin: 0px;
+	width:100%;
+
+	/*border-collapse: collapse;
+	border-spacing: 0;*/
+
+	border-collapse: separate;
+    border-spacing: 0px;
+}
+
+
+.UIMidClient {
+	overflow: hidden;
+	clear:left;
+	/*padding-left: 10px;*/
+
+
+	-webkit-transition: all 0.35s linear;
+  	-moz-transition: all 0.35s linear;
+  	-o-transition: all 0.35s linear;
+  	transition: all 0.35s linear;
+}
+
+.UIScrollbarCanvas {
+	width:100%;
+	background-color: transparent;
+	height: 12px;
+	color: rgba(255,255,255,0.3);
+	font-size: 8px;
+	cursor:pointer;
+	/*font-family: Courier;*/
+}
+
+.UIScrollRangeCanvas {
+	width:100%;
+	background-color: transparent;
+	height: 12px;
+	color: rgba(255,255,255,0.3);
+	font-size: 8px;
+	cursor:pointer;
+	/*font-family: Courier;*/
+}
+
+.UIScrollPaneCanvas {
+	height: 40px;
+	width: 40px;
+	float:right;
+	background-color: transparent;
+	color: rgba(255,255,255,0.3);
+	font-size: 8px;
+	cursor:pointer;
+	/*border:1px solid #000000;*/
+	/*font-family: Courier;*/
+}
+
+.UIColorPicker {
+}
+
+.UIColorPicker .UITable{
+	width: auto;
+	height: 100%;
+	float:right;
+}
+
+.UIColorPicker .UIRed{
+	width:8px;
+	background-color: rgba(200, 100, 50, 1.0);
+	/*-webkit-transition: all 0.15s linear;
+  	-moz-transition: all 0.15s linear;
+  	-o-transition: all 0.15s linear;
+  	transition: all 0.15s linear;*/
+}
+
+
+.UIColorPicker .UIGreen{
+	width:8px;
+	background-color: rgba(150, 200, 50, 1.0);
+}
+
+.UIColorPicker .UIBlue{
+	width:8px;
+	background-color: rgba(50, 150, 200, 1.0);
+}
+
+.UIColorPicker .UIAlpha{
+	width:8px;
+	background-color: rgba(0,0,0,0.1);
+	border:1px solid rgba(255,255,255,0.5);
+
+}
+
+.UIColorPicker .UIColor{
+	position: relative;
+	height:100%;
+	width:16px;
+	cursor:pointer;
+}
+
+.UIMiniScroll {
+	height: 100%;
+	width: 100%;
+	position: relative;
+	background-color: transparent;
+
+	cursor:pointer;
+}
+
+.UIMiniScrollBar {
+	height: 100%;
+	width: 100%;
+
+	/*padding:2px;*/
+	position: relative;
+	background-color: rgba(255,255,255,0.3);
+	cursor:pointer;
+	pointer-events:none;
+
+	  -webkit-border-radius: 15px;
+  -moz-border-radius: 15px;
+  border-radius: 15px;
+	/*border:1px solid #000000;*/
+}
+
+
+.UIListItem {
+	/*background-color: #ffffff;*/
+	border-bottom: 1px solid rgba(0,0,0,0.2);
+
+	cursor:pointer;
+	overflow: hidden;
+	-webkit-transition: all 0.15s linear;
+  	-moz-transition: all 0.15s linear;
+  	-o-transition: all 0.15s linear;
+  	transition: all 0.15s linear;
+}
+
+
+.UIListItem.UISelected {
+	background-color: rgba(100, 100, 100, 1.0);
+}
+
+.UIListItem:hover {
+	background-color: #ffffff;
+	
+}
+
+.UIItemRemover {
+	width: 10px;
+	float: right;
+	/*background-color: #ff0000;*/
+	cursor:pointer;
+	color: #ffffff;
+}
+
+.UIListBox {
+	overflow: auto;
+	/*border-bottom: 1px solid #000000;
+	border-top: 1px solid #000000;*/
+	-webkit-transition: all 0.15s linear;
+  	-moz-transition: all 0.15s linear;
+  	-o-transition: all 0.15s linear;
+  	transition: all 0.15s linear;
+}
+
+.UIShelfClosed{	
+	float:left;
+	overflow: hidden;
+	/*width:10px;*/
+	position: relative;
+
+	height:100%;
+	position:relative;
+	
+	opacity: 1.0;
+	-webkit-transition: all 0.15s linear;
+  	-moz-transition: all 0.15s linear;
+  	-o-transition: all 0.15s linear;
+  	transition: all 0.15s linear;
+}
+
+.UIShelfOpen {
+	float:left;
+	width:auto;
+	height:100%;
+	position:relative;
+	opacity: 1.0;
+	overflow: hidden;
+
+	-webkit-transition: all 0.15s linear;
+  	-moz-transition: all 0.15s linear;
+  	-o-transition: all 0.15s linear;
+  	transition: all 0.15s linear;
+}
+
+.UIShelfParent {
+	/*
+	width:auto;
+	
+	opacity: 1.0;*/
+	overflow: hidden;
+	height:100%;
+	/*position:relative;
+	float:left;*/
+	/*width:20px;*/
+
+	-webkit-transition: all 0.15s linear;
+  	-moz-transition: all 0.15s linear;
+  	-o-transition: all 0.15s linear;
+  	transition: all 0.15s linear;
+}
+
+.UIShelfMask {
+	/*position: absolute;*/
+	float:left;
+	/*left:0px;
+	top:0px;*/
+	pointer-events:auto;
+	width: 20px;
+	height: 100%;
+	cursor:pointer;
+	background-color: rgba(255,255,255,0.5);
+	z-index: 100;
+}
+
+.UIShelfMaskOpen {
+	/*position: absolute;*/
+	float:left;
+	/*left:0px;
+	top:0px;*/
+	pointer-events:auto;
+	width: 20px;
+	height: 100%;
+	cursor:default;
+	background-color: transparent;
+	z-index: 100;
+}
+
+.UIShelfMask:hover {
+	background-color: rgba(255,255,255,1.0);
+}
+
+.UIPopUp {
+	position: absolute;
+	overflow: auto;
+	z-index: 5000;
+	background-color: #eeeeee;
+
+	 -moz-transition: none;
+	-webkit-transition: none;
+	-o-transition: color 0 ease-in;
+	transition: none;
+
+
+		  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+}
+
+.UINoTransition {
+    -moz-transition: none;
+	-webkit-transition: none;
+	-o-transition: color 0 ease-in;
+	transition: none;
+}
+
+.UIAllTransition {
+	-webkit-transition: all 0.15s linear;
+  	-moz-transition: all 0.15s linear;
+  	-o-transition: all 0.15s linear;
+  	transition: all 0.15s linear;
+}
+
+::-webkit-scrollbar {
+    width: 6px;
+    height:6px;
+}
+/*
+::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3); 
+    border-radius: 10px;
+}*/
+ 
+::-webkit-scrollbar-thumb {
+    border-radius: 2px;
+    background-color:rgba(0,0,0,0.3);
+
+   /* -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5); */
+}

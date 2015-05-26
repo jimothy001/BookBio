@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>The Book Biography Machine</title>   
+
+    <script src="http://alasql.org/console/xlsx.core.min.js"></script>   
+
+	<script type="text/javascript" src="lib/jquery-1.8.2.js" ></script>  
+	<script src="/socket.io/socket.io.js"></script>
+
+	<link rel="stylesheet" href="cooplib/cooplib.css">
+	<link rel="stylesheet" href="cooplib/cooplibUIsvg.css">
+	<link rel="stylesheet" href="cooplib/coopGUI.css">
+	<script type="text/javascript" src="cooplib/cooplib.js" ></script>  
+	<script type="text/javascript" src="cooplib/cooplibUIsvg.js" ></script>  
+	<script type="text/javascript" src="cooplib/coopGUI.js" ></script>  
+
+	<script type="text/javascript" src="coopGL/CoLoader.js" ></script>  
+
+	<script type="text/javascript" src="lib/gl-matrix.js" ></script>  
+	<script type="text/javascript" src="coopGL/webgl-utils.js" ></script>  
+
+	<script type="text/javascript" src="coopGL/CoGeometry.js" ></script>  
+	<script type="text/javascript" src="coopGL/CoConstrain.js" ></script>  
+	<script type="text/javascript" src="coopGL/CoGrip.js" ></script>  
+
+	<script type="text/javascript" src="coopGL/CoMouse.js" ></script> 
+
+	<script type="text/javascript" src="coopGL/CoShader.js" ></script> 
+	<script type="text/javascript" src="coopGL/CoDraw.js" ></script> 
+	<script type="text/javascript" src="coopGL/CoMatrixPack.js" ></script> 
+	<script type="text/javascript" src="coopGL/CoCamera.js" ></script>  
+	<script type="text/javascript" src="coopGL/CoMesh.js" ></script>  
+	<script type="text/javascript" src="coopGL/CoModel.js" ></script>  
+	<script type="text/javascript" src="coopGL/CoIsoSurface.js" ></script>  
+	<script type="text/javascript" src="coopGL/CoSurface.js" ></script>  
+	<script type="text/javascript" src="coopGL/CoTexture.js" ></script>  
+	<script type="text/javascript" src="coopGL/CoTexture3d.js" ></script>  
+	<script type="text/javascript" src="coopGL/CoFBO.js" ></script> 
+	<script type="text/javascript" src="coopGL/CoSelection.js" ></script>  
+	<script type="text/javascript" src="coopGL/cooplibGL.js" ></script>  
+
+	<script type="text/javascript" src="UI.js" ></script> 
+	<script type="text/javascript" src="Books.js" ></script>   
+	<script type="text/javascript" src="BookBio.js" ></script>   
+
+	<link rel="stylesheet" href="styles.css"> 
+
+</head>
+<body onload="Main()">
+	
+	<input type = "file" id = "upload" onchange = "Read(event)">
+
+	<div id="central">
+		<canvas id="canvas1" width="256" height="256"></canvas> 
+	</div> 
+</body>
+</html>
+
+
+
+

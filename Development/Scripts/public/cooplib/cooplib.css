@@ -1,0 +1,47 @@
+#loginbox{
+	position: fixed;
+	left: 20%;
+	width: 60%;
+	top:0;
+	height: 50%;
+	max-height: 500px;
+	min-height: 200px;
+	background-color: #aaaaaa;
+	z-index: 10000;
+	padding: 5px;
+	margin: 0px;
+	font-family: Consolas, monaco, monospace;
+}
+
+#signIn{
+	float:left;
+	position: relative;
+	height: 100%;
+}
+
+#signUp{
+	float:left;
+	position: relative;
+	height: 100%;
+	
+}
+
+.signOpen {
+	width: 90%;
+	background-color: #ffffff;
+
+	    -webkit-transition: all 0.2s linear;
+  -moz-transition: all 0.2s linear;
+  -o-transition: all 0.2s linear;
+  transition: all 0.2s linear;
+}
+
+.signClosed {
+	width: 10%;
+	background-color: #555555;
+
+	    -webkit-transition: all 0.2s linear;
+  -moz-transition: all 0.2s linear;
+  -o-transition: all 0.2s linear;
+  transition: all 0.2s linear;
+}
