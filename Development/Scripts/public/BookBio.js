@@ -236,14 +236,7 @@ function BatchQueryGeo()
 	geoquery=[];
 }
 
-socket.on("_BatchGeo", function(_data) //Grouped geo data that the server already has
-{
-	var data = _data;
-	console.log("_BatchGeoAnswers");
-	console.log(data);
-});
-
-//Update collection with geo data
+//Update collection with geo data//***economize this
 
 socket.on("_Geo", function(_data) //Individual geo data that the server did not previously have
 {
