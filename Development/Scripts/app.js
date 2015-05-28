@@ -276,8 +276,7 @@ function GeoQuery()
 			{
 				if(docs.length > 0) //if docs are found
 				{	
-					data.c = geoqueries[0].c; //client's collection index
-					data.e = geoqueries[0].e; //client's edition index
+					data.addresses = geoqueries[0].addresses; //client's collection / edition addresses
 					data.city = docs[0].city;
 					data.territory = docs[0].territory;
 					data.country = docs[0].country;
@@ -327,8 +326,7 @@ function GeoQuery()
 											}
 										);
 
-										data.c = geoqueries[0].c; //client's collection index
-										data.e = geoqueries[0].e; //client's edition index
+										data.addresses = geoqueries[0].addresses; //client's collection / edition addresses
 
 										GeoToClient(id, data); //send results to client
 

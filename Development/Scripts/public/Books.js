@@ -20,26 +20,22 @@ function Read(event)
 {
 	console.log("Read");
 	var x = document.getElementById("upload");
-	console.log(x);
+	//console.log(x);
 	if('files' in x)
 	{
-		// Load binary file from desktop
+		// Load binary file from desktop //*** this seems to take awhile for some reason
         loadBinaryFile(event,function(data)
         {
             // Parse it to JSON
 	    	var workbook = XLSX.read(data,{type:'binary'});
 	    	var sheet_name = workbook.SheetNames[0]; //allow multiple sheets
 	    	var worksheet = workbook.Sheets[sheet_name];
-
 	    	var name = sheet_name;
 	    	var data = XLSX.utils.sheet_to_json(worksheet); //super useful!
-	    	
-	    	console.log(data);
 
 	    	var c = new Collection(name, data);
 
-
-	    	//Read worksheet**** PICK UP HERE - string parsing for cell address, "A" = new json object
+	    	//example of reading individual cells in a worksheet
 	    	/*for(var i in worksheet)
 	    	{
 	    		if(i[0] === '!') continue;
@@ -50,6 +46,7 @@ function Read(event)
 	    	}*/
         });
 	}
+	else console.log("no files in upload");
 }
 
 function loadBinaryFile(path, success) {
@@ -76,6 +73,8 @@ function loadBinaryFile(path, success) {
 
 function Collection(_name, _data)
 {
+	console.log("new collection");
+
 	this.name = _name;
 	this.size = _data.length;
 	this.editions = []; //collection of editions
@@ -300,8 +299,10 @@ function Edition(_c, _e, _data, _emat, _smat)
 	{
 		if(this.place != "")
 		{
-			var data = {c: this.c, e: this.e, place: this.place};
-			geoquery.push(data);
+			var address = [{c: this.c, e: this.e}]; //nested addresses
+			var query = {addresses: address, place: this.place};
+			
+			GeoQuery(query);
 		}
 		else console.log("this.place is empty: " + this.place);
 	}
@@ -356,17 +357,18 @@ Edition.prototype.Zmap = function(_map)
 	else this.tz = 41.0;
 }
 
-Edition.prototype.UpdateGeo = function(_lt, _lg, _city, _territory, _country)
+Edition.prototype.UpdateGeo = function(u)
 {
-	this.lt = parseFloat(_lt);
+
+	this.lt = parseFloat(u.lt);
 	this.ty = Remap(this.lt, -90.0, 90.0, 24.319, -24.319);
 
-	this.lg = parseFloat(_lg); 
+	this.lg = parseFloat(u.lg); 
 	this.tx = Remap(this.lg, -180.0, 180.0, 48.0015+offset, -48.0015+offset);
 
-	this.city = _city;
-	this.territory = _territory;
-	this.country = _country;
+	this.city = u.city;
+	this.territory = u.territory;
+	this.country = u.country;
 }
 
 Edition.prototype.update = function()
@@ -397,4 +399,32 @@ function Remap(val, from1, to1, from2, to2)
 {
 	var result = (val - from1) / (to1 - from1) * (to2 - from2) + from2;
 	return result;
+}
+
+function GeoQuery(q)
+{
+	var addnew = true;
+
+	for(var i in geoquery)
+	{
+		if(geoquery[i].place == q.place)
+		{
+			geoquery[i].addresses.push(q.addresses[0]);
+			addnew = false;
+			break;
+		}
+	}
+
+	if(addnew) geoquery.push(q);
+}
+
+function GeoResponse(r)
+{
+	for(var i in r.addresses)
+	{
+		var c = r.addresses[i].c;
+		var e = r.addresses[i].e;
+
+		collections[c].editions[e].UpdateGeo(r);
+	}
 }
