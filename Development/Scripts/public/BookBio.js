@@ -230,7 +230,7 @@ socket.on("_QueryGeoDB", function(_data)
 
 function BatchQueryGeo()
 {
-	console.log("BatchQueryGeo: " + geoquery[0].place);
+	console.log("BatchQueryGeo length: " + geoquery.length);
 	var data = {queries: geoquery};
 	queueMsg('BatchQueryGeo', data);
 	geoquery=[];
@@ -238,13 +238,12 @@ function BatchQueryGeo()
 
 //Update collection with geo data//***economize this
 
-socket.on("_Geo", function(_data) //Individual geo data that the server did not previously have
+socket.on("_Geo", function(_data) //Individual geo data
 {
 	if(!_data.err)
 	{
-		var edition = _data;
-		var c = parseInt(edition.c);
-		collections[c].UpdateGeo(edition);
+		var r = _data;
+		GeoResponse(r);
 	}
 	else console.log("server error: " + _data.err);
 });
