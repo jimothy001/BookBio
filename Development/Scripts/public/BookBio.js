@@ -40,8 +40,40 @@ function Main()
 	gl=coGL.gl;
 	var mat1=new coGL.Material(coGL.shaders.default, {"uColor":[0.97,0.97,0.97,0.5]});//, "uTexture":0}, {"0":coGL.textures.white});//coGL.Material(coGL.shaders.normal, {"uColor":[0.9,0.8,0.8,1], "uTexture":0}, {"0":coGL.textures.white});
 	var mat2=new coGL.Material(coGL.shaders.cell,{"uColor":[0.7,0.7,0.7,1]}); //, "uSpecular": [1,1,1,50.0], "uAmbient":[0.4,0.4,0.4,1], "uTexture":0}, {"0":coGL.textures.white});//coGL.textures.white
+	
+
 
 	//GEOGRAPHY// need to replace w/ single quad w/ texture
+	
+	var mapimage = "images/map_transparent_pow_2.png";
+	/*var geotexture = coGL.createTextureFromFile(mapimage);
+	console.log(geotexture);
+	var geoshader=coGL.LoadShaderFromFiles("phong_map", "coopGL/shaders/default_vs.glsl", "coopGL/shaders/phong_map.glsl");
+	var geomat = coGL.Material(geoshader, {"uColor":[0.1,1.0,1.0,0.7], "uAmbient":[0, 0, 0, 1], "uTexture":0}, {"0":geotexture});
+	var _geomesh = coGL.loadMeshFromJSON("models/mapbase.json");
+	var geomesh = new coGL.Model(_geomesh, 0.0, 0.0, 0.0);
+	geomesh.material = geomat;
+	modelsToRender.push(geomesh);*/
+
+	var geotexture = coGL.createTextureFromFile(mapimage, function()
+	{
+		console.log(mapimage);
+		console.log(geotexture);
+		//var geoshader=coGL.LoadShaderFromFiles("phong_map", "coopGL/shaders/default_vs.glsl", "coopGL/shaders/phong_map.glsl");
+		var geoshader=coGL.LoadShaderFromFiles("sprite", "coopGL/shaders/sprite_vs.glsl", "coopGL/shaders/sprite_fs.glsl");		
+		var geomat = new coGL.Material(geoshader, {"uColor":[1.0,1.0,1.0,1.0], "uTexture":0, "uAmbient":[1,1,1,1]}, {"0":geotexture});
+		console.log(geomat);
+		var _geomesh = coGL.loadMeshFromJSON("models/mapbase.json");
+		var geomesh = new coGL.Model(_geomesh, 0.0, 0.0, 0.0);
+		geomesh.material = geomat;
+		modelsToRender.push(geomesh);
+	});
+	
+
+
+	
+	
+
 	/*for(var i=0; i<161; i++)
 	{
 		var _geomesh = coGL.loadMeshFromJSON("models/geo" + i + ".json");
