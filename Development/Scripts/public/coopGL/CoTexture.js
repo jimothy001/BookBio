@@ -154,7 +154,7 @@ COGL.TextureModule=function(_cogl) {
      _cogl.Texture.prototype.fromImage = function (_image) {
         this.image=_image;
         this.ready=true;
-
+        this.update();
        /* if (!_image) return;
         if (this.texture == null) {
             this.texture = gl.createTexture();
@@ -186,7 +186,7 @@ COGL.TextureModule=function(_cogl) {
         var that=this;
         _cogl.loader.getImage(_file, this, function(_err, _img) {
             if (_err && _onload) _onload(_err, null);
-            if (_img) that.loaded(img, _onload);
+            if (_img) that.loaded(_img, _onload);
         });
     }
 
