@@ -45,16 +45,7 @@ function Main()
 
 	//GEOGRAPHY// need to replace w/ single quad w/ texture
 	
-	var mapimage = "images/map_transparent_pow_2.png";
-	/*var geotexture = coGL.createTextureFromFile(mapimage);
-	console.log(geotexture);
-	var geoshader=coGL.LoadShaderFromFiles("phong_map", "coopGL/shaders/default_vs.glsl", "coopGL/shaders/phong_map.glsl");
-	var geomat = coGL.Material(geoshader, {"uColor":[0.1,1.0,1.0,0.7], "uAmbient":[0, 0, 0, 1], "uTexture":0}, {"0":geotexture});
-	var _geomesh = coGL.loadMeshFromJSON("models/mapbase.json");
-	var geomesh = new coGL.Model(_geomesh, 0.0, 0.0, 0.0);
-	geomesh.material = geomat;
-	modelsToRender.push(geomesh);*/
-
+	/*var mapimage = "images/map_transparent_pow_2.png"; //***need to write shader for straight-forward texture drawing with transparency.
 	var geotexture = coGL.createTextureFromFile(mapimage, function()
 	{
 		console.log(mapimage);
@@ -67,21 +58,16 @@ function Main()
 		var geomesh = new coGL.Model(_geomesh, 0.0, 0.0, 0.0);
 		geomesh.material = geomat;
 		modelsToRender.push(geomesh);
-	});
-	
+	});*/
 
-
-	
-	
-
-	/*for(var i=0; i<161; i++)
+	for(var i=0; i<161; i++)
 	{
 		var _geomesh = coGL.loadMeshFromJSON("models/geo" + i + ".json");
 		var geomesh = new coGL.Model(_geomesh, 0.0, 0.0, 0.0);
 		geomesh.material=mat1;
 		modelsToRender.push(geomesh);
 		//modelsToSelect.push(geomesh);
-	}*/
+	}
 
 	coGL.enableSelectionPass(modelsToSelect);
 	//coGL.enableDepthPass(modelsToSelect);
