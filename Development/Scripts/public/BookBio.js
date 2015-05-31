@@ -42,14 +42,14 @@ function Main()
 	var mat2=new coGL.Material(coGL.shaders.cell,{"uColor":[0.7,0.7,0.7,1]}); //, "uSpecular": [1,1,1,50.0], "uAmbient":[0.4,0.4,0.4,1], "uTexture":0}, {"0":coGL.textures.white});//coGL.textures.white
 
 	//GEOGRAPHY// need to replace w/ single quad w/ texture
-	for(var i=0; i<161; i++)
+	/*for(var i=0; i<161; i++)
 	{
 		var _geomesh = coGL.loadMeshFromJSON("models/geo" + i + ".json");
 		var geomesh = new coGL.Model(_geomesh, 0.0, 0.0, 0.0);
 		geomesh.material=mat1;
 		modelsToRender.push(geomesh);
 		//modelsToSelect.push(geomesh);
-	}
+	}*/
 
 	coGL.enableSelectionPass(modelsToSelect);
 	//coGL.enableDepthPass(modelsToSelect);
