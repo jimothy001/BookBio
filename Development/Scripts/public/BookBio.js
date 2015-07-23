@@ -45,6 +45,7 @@ function Main()
 
 	//GEOGRAPHY// need to replace w/ single quad w/ texture
 	
+<<<<<<< HEAD
 	//var mapimage = "images/map_transparent_pow_2.png";
 	
 	/*var geotexture = coGL.createTextureFromFile(mapimage);
@@ -57,6 +58,10 @@ function Main()
 	modelsToRender.push(geomesh);*/
 
 	/*var geotexture = coGL.createTextureFromFile(mapimage, function()
+=======
+	/*var mapimage = "images/map_transparent_pow_2.png"; //***need to write shader for straight-forward texture drawing with transparency.
+	var geotexture = coGL.createTextureFromFile(mapimage, function()
+>>>>>>> master
 	{
 		console.log(mapimage);
 		console.log(geotexture);
@@ -69,7 +74,10 @@ function Main()
 		geomesh.material = geomat;
 		modelsToRender.push(geomesh);
 	});*/
+<<<<<<< HEAD
 	
+=======
+>>>>>>> master
 
 	for(var i=0; i<161; i++)
 	{
