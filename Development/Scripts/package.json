@@ -3,7 +3,8 @@
   "description": "intro app",
   "version": "0.0.1",
   "private": true,
-  "dependencies": {
+  "dependencies": 
+  {
     "connect":"*",
     "method-override":"*",
     "body-parser":"*",
