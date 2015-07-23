@@ -45,8 +45,23 @@ function Main()
 
 	//GEOGRAPHY// need to replace w/ single quad w/ texture
 	
+<<<<<<< HEAD
+	//var mapimage = "images/map_transparent_pow_2.png";
+	
+	/*var geotexture = coGL.createTextureFromFile(mapimage);
+	console.log(geotexture);
+	var geoshader=coGL.LoadShaderFromFiles("phong_map", "coopGL/shaders/default_vs.glsl", "coopGL/shaders/phong_map.glsl");
+	var geomat = coGL.Material(geoshader, {"uColor":[0.1,1.0,1.0,0.7], "uAmbient":[0, 0, 0, 1], "uTexture":0}, {"0":geotexture});
+	var _geomesh = coGL.loadMeshFromJSON("models/mapbase.json");
+	var geomesh = new coGL.Model(_geomesh, 0.0, 0.0, 0.0);
+	geomesh.material = geomat;
+	modelsToRender.push(geomesh);*/
+
+	/*var geotexture = coGL.createTextureFromFile(mapimage, function()
+=======
 	/*var mapimage = "images/map_transparent_pow_2.png"; //***need to write shader for straight-forward texture drawing with transparency.
 	var geotexture = coGL.createTextureFromFile(mapimage, function()
+>>>>>>> master
 	{
 		console.log(mapimage);
 		console.log(geotexture);
@@ -59,6 +74,10 @@ function Main()
 		geomesh.material = geomat;
 		modelsToRender.push(geomesh);
 	});*/
+<<<<<<< HEAD
+	
+=======
+>>>>>>> master
 
 	for(var i=0; i<161; i++)
 	{
@@ -175,6 +194,7 @@ function Main()
 
 		if(e.wheelDelta > 0)
 		{
+			console.log("+");
 			if(cameradistance > 5.0)
 			{
 				cameradistance -= 4.0;
@@ -183,6 +203,7 @@ function Main()
 		}
 		else if(e.wheelDelta < 0)
 		{
+			console.log("-");
 			if(cameradistance < 90.0)
 			{
 				cameradistance += 4.0;

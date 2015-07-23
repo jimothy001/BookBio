@@ -84,7 +84,6 @@ function Collection(_name, _data)
 
 	var ci = collections.length; //this collection's index after it is added to collections array
 
-
 	for(var i in _data)
 	{
 		var e = new Edition(ci, i, _data[i], this.emat, this.smat);
