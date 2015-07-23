@@ -1,0 +1,108 @@
+Book Bio - Work Plan for prototype to iterate on later based on user interviews.
+
+Goals
+
+	User gives / gets workset data.
+	
+	User curates data based on what they see.
+	
+	User saves workset data on their side.
+
+
+Objectives
+
+	Bibliographic API
+		Give user "search bar" type access to a single bibliographic API
+
+	Account for Bibliographic API workflow in UI design + development
+		How will the UI permit user interface with the bib API
+		How will it permit user interface with data from bib API
+
+	Flexible UI - ability to curate multiple data sets with differentiating fields
+		does / does not have value for specific field. (current)
+		does / does not have specific value for specific field
+		turn individual editions / manuscript copies on / off
+
+	Clarity in graphic representation of data sets. (whittle this down)
+		Time Scaling / Time demarcation
+		Differentiation between datasets for comparison
+		Instantiation (ta da!)
+		Visual effect for on / off
+		Annotation
+		Efficiency (represent world with texture, not meshes)
+
+	User can save information on client side
+		model space images
+		csv or xlsx
+
+	Another pass at geocoding (if there's time)
+		batch geo coding using open street maps geocoding API
+		structure of geocoding data saved on server (for efficiency)
+
+
+7.26 - 8.01
+
+	JSY:
+	Clean
+	Comment up code for AH
+
+	AH:
+	Look into bibliographic APIs
+		***Hathi Trust***
+		WorldCat
+		DPLA
+		Hollis
+		OpenLibrary
+		Europeana (Includes BNF, Royal Danish)
+		UC Libraries - California Digital Libraries
+		British Library - largest
+		NY Public Library 
+	Bibliographic API implementation
+
+
+8.02 - 8.08
+
+	JSY:
+	UI flexibility for varying data sets
+	Graphic representation 
+	
+	JSY or AH:
+	Relationship between UI + multiple data sets + bib API
+
+	AH:
+	bibliographic API implementation
+
+
+8.09 - 8.15
+
+	JSY:
+	UI flexibility for varying data sets (cont.)
+	Graphic representation (cont.)
+
+	JSY or AH:
+	Relationship between UI + multiple data sets + bib API. (cont.)
+
+	AH:
+	bibliographic API implementation (cont.)
+
+
+8.16 - 8.22
+
+	JSY: (???)
+	Graphic representation (cont.)
+	
+	JSY or AH:
+	Save output
+
+	AH:
+	Relationship between UI + bib API.
+
+
+8.23 - 8.29
+	
+	JSY: (???)
+	Graphic representation (cont.)
+	
+	AH:
+	Save output
+	Relationship between UI + bib API. (cont.)

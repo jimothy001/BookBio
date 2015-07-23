@@ -17,10 +17,10 @@
 		this.ref = "";
 		this.note = "";
 
-		this.parentstack=new CO.UIStack(document.body).setLabel("buttons and knobs and things").setCollapsible(true);
+		this.parentstack=new CO.UIStack(document.body).setLabel("UI").setCollapsible(true);
 		parentstack.setLocation(80+"%", 1+"%", "fixed").setSize(19.5+"%");
 
-		this.stack = this.parentstack.addStack("The Divine Comedy").setCollapsible(true);
+		this.stack = this.parentstack.addStack("collection").setCollapsible(true);
 		this.citybutton = this.stack.addButton("place: " + this.place).setOnPressed(function(e) {collections[0].Filter("place");});
 		this.shelfbutton = this.stack.addButton("shelf: " + this.shelf).setOnPressed(function(e) {collections[0].Filter("shelf");});
 		this.matbutton = this.stack.addButton("mat: " + this.mat).setOnPressed(function(e) {collections[0].Filter("mat");});
@@ -35,16 +35,17 @@
 		this.refbutton = this.stack.addButton("reference: " + this.ref).setOnPressed(function(e) {collections[0].Filter("ref");});	
 		this.notebutton = this.stack.addButton("note: " + this.note).setOnPressed(function(e) {collections[0].Filter("note");});
 
-		this.geofetch = this.parentstack.addStack("geo query").setCollapsible(true);
-		this.geofetch.addTextInput("type and press enter").setOnCommited(function(v)
+		//this.geofetch = this.parentstack.addStack("geo query").setCollapsible(true);
+		/*this.geofetch.addTextInput("type and press enter").setOnCommited(function(v)
 		{
 			if(v != "" || v != " ") QueryGeoDB(v);//QueryGeo(v);
 			console.log("from text query field: " + v);
-		});
+		});*/
 
 		this.upload = this.parentstack.addButton("upload").setOnPressed(function(e)
 		{
 			var x = document.getElementById("upload");
+			console.log(x);
 			x.click();
 		});
 

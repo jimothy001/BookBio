@@ -13,7 +13,6 @@
     "routes":"*",
     "socket.io" :"*",
     "mongodb": "*",
-    "node-geocoder": "*",
-    "gl-matrix-mat4":"*"
+    "node-geocoder": "*"
   }
 }

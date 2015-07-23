@@ -45,7 +45,8 @@ function Main()
 
 	//GEOGRAPHY// need to replace w/ single quad w/ texture
 	
-	var mapimage = "images/map_transparent_pow_2.png";
+	//var mapimage = "images/map_transparent_pow_2.png";
+	
 	/*var geotexture = coGL.createTextureFromFile(mapimage);
 	console.log(geotexture);
 	var geoshader=coGL.LoadShaderFromFiles("phong_map", "coopGL/shaders/default_vs.glsl", "coopGL/shaders/phong_map.glsl");
@@ -55,7 +56,7 @@ function Main()
 	geomesh.material = geomat;
 	modelsToRender.push(geomesh);*/
 
-	var geotexture = coGL.createTextureFromFile(mapimage, function()
+	/*var geotexture = coGL.createTextureFromFile(mapimage, function()
 	{
 		console.log(mapimage);
 		console.log(geotexture);
@@ -67,21 +68,17 @@ function Main()
 		var geomesh = new coGL.Model(_geomesh, 0.0, 0.0, 0.0);
 		geomesh.material = geomat;
 		modelsToRender.push(geomesh);
-	});
+	});*/
 	
 
-
-	
-	
-
-	/*for(var i=0; i<161; i++)
+	for(var i=0; i<161; i++)
 	{
 		var _geomesh = coGL.loadMeshFromJSON("models/geo" + i + ".json");
 		var geomesh = new coGL.Model(_geomesh, 0.0, 0.0, 0.0);
 		geomesh.material=mat1;
 		modelsToRender.push(geomesh);
 		//modelsToSelect.push(geomesh);
-	}*/
+	}
 
 	coGL.enableSelectionPass(modelsToSelect);
 	//coGL.enableDepthPass(modelsToSelect);
@@ -189,6 +186,7 @@ function Main()
 
 		if(e.wheelDelta > 0)
 		{
+			console.log("+");
 			if(cameradistance > 5.0)
 			{
 				cameradistance -= 4.0;
@@ -197,6 +195,7 @@ function Main()
 		}
 		else if(e.wheelDelta < 0)
 		{
+			console.log("-");
 			if(cameradistance < 90.0)
 			{
 				cameradistance += 4.0;
