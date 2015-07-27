@@ -21,8 +21,6 @@ var app=express();
 var http=require('http');
 var server=http.createServer(app);
 
-//configure express as a typical web server
-
 app.get("/", function(req, res) {
   res.redirect("/index.html");
 });
@@ -157,70 +155,6 @@ io.sockets.on('connection', function (socket) {
 				geoqueries.push(queries[i]);
 			}
 		}
-	});
-
-
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//TEMPORARY FUNCTIONS USING SOCKET
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	//feeds all DC data to client in one fell swoop
-	socket.on('GetDC', function (_data)
-	{
-		var data = {name: "DC", collection: DC};
-		socket.emit('_GetDC', data);
-	});
-
-
-	//queries db based on typed query term from client - you have to wait for a response
-	socket.on('TestQueryGeoDB', function(_data)
-	{
-		var query = _data.query + "";
-		console.log(query);
-		
-		GEO.find({city: query}).toArray(function(err, docs) //can give multiple results
-		{
-			var data = {};
-			if(!err)
-			{
-				if(docs.length > 0)
-				{
-					data.res = docs[0];
-				}
-				else
-	    		{
-	    			data.res = "not in db";
-	    		}
-	    	}
-	    	else
-	    	{
-	    		console.log(err);
-	    		data.res = err;
-	    	}
-	    	socket.emit('_QueryGeoDB', data);
-
-	    	console.log("live long"); //and prosper live long
-		});
-			console.log("and prosper"); //continues to execute code while it waits for mongo to respond....
-	});
-
-
-	//queries geo coder based on typed search term from client - you REALLY have to wait for a response and can only place one query at a time
-	socket.on('TestQueryGeo', function(_data)
-	{
-		var query = _data.query + "";
-		console.log(query);
-
-		//Consider querying OpenCage from client side (exposed API key, unfortunately) if daily limit applies to
-		//IP Addresses rather than all queries that share the same API key.
-		geocoder.geocode(query, function(err, res)//should add to a queue
-		{
-			var data = {geo: res[0]};
-			socket.emit('_TestQueryGeo', data);
-		});
 	});
 
 });
@@ -364,8 +298,9 @@ function GeoQuery()
 }
 setInterval(GeoQuery, 50); //arbitrary rate of repetition
 
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//TEMPORARY
+//OUTMODED
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -375,9 +310,72 @@ setInterval(GeoQuery, 50); //arbitrary rate of repetition
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+/*
+
+//OLD SOCKET FUNCTIONS
+
+//feeds all DC data to client in one fell swoop
+socket.on('GetDC', function (_data)
+{
+	var data = {name: "DC", collection: DC};
+	socket.emit('_GetDC', data);
+});
+
+//queries db based on typed query term from client - you have to wait for a response
+socket.on('TestQueryGeoDB', function(_data)
+{
+	var query = _data.query + "";
+	console.log(query);
+	
+	GEO.find({city: query}).toArray(function(err, docs) //can give multiple results
+	{
+		var data = {};
+		if(!err)
+		{
+			if(docs.length > 0)
+			{
+				data.res = docs[0];
+			}
+			else
+    		{
+    			data.res = "not in db";
+    		}
+    	}
+    	else
+    	{
+    		console.log(err);
+    		data.res = err;
+    	}
+    	socket.emit('_QueryGeoDB', data);
+
+    	console.log("live long"); //and prosper live long
+	});
+		console.log("and prosper"); //continues to execute code while it waits for mongo to respond....
+});
+
+//queries geo coder based on typed search term from client - you REALLY have to wait for a response and can only place one query at a time
+socket.on('TestQueryGeo', function(_data)
+{
+	var query = _data.query + "";
+	console.log(query);
+
+	//Consider querying OpenCage from client side (exposed API key, unfortunately) if daily limit applies to
+	//IP Addresses rather than all queries that share the same API key.
+	geocoder.geocode(query, function(err, res)//should add to a queue
+	{
+		var data = {geo: res[0]};
+		socket.emit('_TestQueryGeo', data);
+	});
+});
+
+//END OLD SOCKET FUNCTIONS
+
+
+
 var __DC = require('./DC.js');
 var _DC = __DC.getDC();
 var DC;
+
 
 function PopulateDC(_DC)
 {
@@ -426,3 +424,4 @@ function SortDC(__DC)
 		return 0;
 	});
 }
+*/
