@@ -77,7 +77,6 @@ function Main()
 		var geomesh = new coGL.Model(_geomesh, 0.0, 0.0, 0.0);
 		geomesh.material=mat1;
 		modelsToRender.push(geomesh);
-		//modelsToSelect.push(geomesh);
 	}
 
 	coGL.enableSelectionPass(modelsToSelect);
