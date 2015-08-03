@@ -143,7 +143,7 @@ io.sockets.on('connection', function (socket) {
 
 	//pushes geo queries from client bibliographic data to list that is checked against db
 	//for each non-match with db, geocoder is queried and results are then added to db to lighten load on geocoder (okay per ODbL)
-	socket.on('BatchQueryGeo', function(_data)
+	socket.on('QueryGeo', function(_data)
 	{
 		if(_data.queries)
 		{
@@ -186,7 +186,7 @@ function GeoToClient(id, data)
 {
 	if (io.sockets.connected[id]) //if client is connected
 	{
-		io.sockets.connected[id].emit('_Geo', data); 
+		io.sockets.connected[id].emit('_QueryGeo', data); 
 	}
 	else console.log("can't send to client because client is not connected");
 
@@ -269,7 +269,7 @@ function GeoQuery()
 									}
 								}
 
-								if(nocity == true) GeoReset(); //***Develop a fallback tactic for no cities in OpenCage associated with search term
+								if(nocity == true) GeoReset(); //***Develop a client response for no cities in OpenCage associated with search term
 							}
 							else //if there are no geocodes associated with search term
 							{

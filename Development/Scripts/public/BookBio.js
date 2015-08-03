@@ -5,8 +5,7 @@ var ui;
 var coGL;
 var gl;
 var modelsToRender=[]; //models to render is a collection of things with a render funciton they could even represent arbitrary conditional group selectors
-var modelsToSelect=[];
-var geo = [];
+var modelsToSelect=[];  //collection of models that are selectable
 var cameradistance = 50.0;
 var bgcol = [0.9,0.9,0.9,1];
 
@@ -29,7 +28,7 @@ var query; //query geographic data
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
+
 function Main()
 {	
 	//UI
@@ -38,10 +37,9 @@ function Main()
 	//GL
 	coGL=COGL.init("canvas1");
 	gl=coGL.gl;
-	var geomat = new coGL.Material(coGL.shaders.default, {"uColor":[0.97,0.97,0.97,0.5]});//, "uTexture":0}, {"0":coGL.textures.white});//coGL.Material(coGL.shaders.normal, {"uColor":[0.9,0.8,0.8,1], "uTexture":0}, {"0":coGL.textures.white});
+	var geomat = new coGL.Material(coGL.shaders.default, {"uColor":[0.97,0.97,0.97,0.5]});
 
-	//GEOGRAPHY
-	
+	//GEOGRAPHY //need to replace w/ single quad w/ texture
 	for(var i=0; i<161; i++)
 	{
 		var _geomesh = coGL.loadMeshFromJSON("models/geo" + i + ".json");
@@ -49,33 +47,6 @@ function Main()
 		geomesh.material=mat1;
 		modelsToRender.push(geomesh);
 	}
-
-	//need to replace w/ single quad w/ texture //attempts below...
-
-	//var mapimage = "images/map_transparent_pow_2.png";
-	/*var geotexture = coGL.createTextureFromFile(mapimage);
-	console.log(geotexture);
-	var geoshader=coGL.LoadShaderFromFiles("phong_map", "coopGL/shaders/default_vs.glsl", "coopGL/shaders/phong_map.glsl");
-	var geomat = coGL.Material(geoshader, {"uColor":[0.1,1.0,1.0,0.7], "uAmbient":[0, 0, 0, 1], "uTexture":0}, {"0":geotexture});
-	var _geomesh = coGL.loadMeshFromJSON("models/mapbase.json");
-	var geomesh = new coGL.Model(_geomesh, 0.0, 0.0, 0.0);
-	geomesh.material = geomat;
-	modelsToRender.push(geomesh);*/
-
-	/*var mapimage = "images/map_transparent_pow_2.png"; //***need to write shader for straight-forward texture drawing with transparency.
-	var geotexture = coGL.createTextureFromFile(mapimage, function()
-	{
-		console.log(mapimage);
-		console.log(geotexture);
-		//var geoshader=coGL.LoadShaderFromFiles("phong_map", "coopGL/shaders/default_vs.glsl", "coopGL/shaders/phong_map.glsl");
-		var geoshader=coGL.LoadShaderFromFiles("sprite", "coopGL/shaders/sprite_vs.glsl", "coopGL/shaders/sprite_fs.glsl");		
-		var geomat = new coGL.Material(geoshader, {"uColor":[1.0,1.0,1.0,1.0], "uTexture":0, "uAmbient":[1,1,1,1]}, {"0":geotexture});
-		console.log(geomat);
-		var _geomesh = coGL.loadMeshFromJSON("models/mapbase.json");
-		var geomesh = new coGL.Model(_geomesh, 0.0, 0.0, 0.0);
-		geomesh.material = geomat;
-		modelsToRender.push(geomesh);
-	});*/
 
 	coGL.enableSelectionPass(modelsToSelect); //this appears to be the only pass that is necessary
 	//coGL.enableDepthPass(modelsToSelect);
@@ -101,10 +72,11 @@ function Main()
 	var sharedFBO=new coGL.FBO(bsize, bsize, false);
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//RUNS EVERY FRAME
+	//DRAWS COLLECTIONS AND MAP, RUNS EVERY FRAME
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	coGL.addRenderingPass("final"). 
-		clearColorV(bgcol). //bgcol.color
+		clearColorV(bgcol).
 		clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT).
 		camera().
 		light(light). //try doing without this
@@ -130,33 +102,29 @@ function Main()
 				}
 				coGL.drawLines.commit();
 			}
-			//var plane=new coGL.Plane(coGL.mouse.point3d, coGL.mouse.normal); //could come in handy for selection of geographic features
-			//plane.getMatrix(cubemodel.modelmatrix);
-
-			//if (coGL.mouse.isOnBackground) 
-			//{
-			//	cubemodel.moveTo([0,0,0]);
-			//}
 		}).
 		activate();
+		
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	//LISTENERS
-	canvas1.addEventListener("mousedown", function(e) {
-
+	canvas1.addEventListener("mousedown", function(e) 
+	{
+		//focus on item: set camera target and set UI values
 		if (select != null) //(e.which==1 && coGL.mouseOverObject) 
 		{
-			if(currentselect != null) currentselect.book.material = currentselect.emat;
-			currentselect = select;
-			currentselect.book.material = select.smat;
+			if(currentselect != null) currentselect.book.material = currentselect.emat; //change current selections material back to original
+			currentselect = select; 
+			currentselect.book.material = select.smat; //apply selection material
 
 			var t = [select.x, select.y, select.z];
-			coGL.camera.setTargetPoint(t);
+			coGL.camera.setTargetPoint(t); //set camera target
 
 			console.log(currentselect.smat);
 
+			//ui fields //MAKE FLEXIBLE
 			ui.citybutton.setLabel("place: " + select.place);
 			ui.shelfbutton.setLabel("shelf: " + select.shelf);
 			ui.matbutton.setLabel("material: " + select.bmat);
@@ -176,7 +144,9 @@ function Main()
 
 	});
 
-	canvas1.addEventListener("wheel", function(e) {
+	//zoom in, zoom out
+	canvas1.addEventListener("wheel", function(e) 
+	{
 
 		if(e.wheelDelta > 0)
 		{
@@ -210,60 +180,24 @@ function Main()
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+//hola
 socket.on("welcome", function(_data)
 {
-		id = _data.id;
+		id = _data.id; //consistent with client id on server - seems useful for annotation system?
 		console.log("this is my socket ID: " + id);
-
-		var data = {};
-		//queueMsg('GetDC', data); //temporary
 });
 
-socket.on("_GetDC", function(_data)
+//gets geocodes for bib locations + called from collection instantiation
+function QueryGeo()
 {
-	var data = _data;
-	var c = new Collection(data.name, data.collection);
-});
-
-function QueryGeo(_query)
-{
-	console.log("QueryGeo");
-	var data = {query: _query};
-	queueMsg('QueryGeo', data);
-}
-
-socket.on("_QueryGeo", function(_data)
-{
-	var data = _data;
-	console.log("_QueryGeo");
-	console.log(data);
-});
-
-function QueryGeoDB(_query)
-{
-	console.log("QueryGeoDB");
-	var data = {query: _query};
-	queueMsg('QueryGeoDB', data);
-}
-
-socket.on("_QueryGeoDB", function(_data)
-{
-	var data = _data;
-	console.log("_QueryGeoDB");
-	console.log(data);
-});
-
-function BatchQueryGeo()
-{
-	console.log("BatchQueryGeo length: " + geoquery.length);
+	console.log("QueryGeo length: " + geoquery.length);
 	var data = {queries: geoquery};
-	queueMsg('BatchQueryGeo', data);
-	geoquery=[];
+	queueMsg('QueryGeo', data);
+	geoquery=[]; //empty the geoquery array
 }
 
-//Update collection with geo data//***economize this
-
-socket.on("_Geo", function(_data) //Individual geo data
+//updates collection with geo data
+socket.on("_QueryGeo", function(_data)
 {
 	if(!_data.err)
 	{
@@ -302,3 +236,124 @@ function tick()
 
 //set the function tick() to repeat every 20 milliseconds. Tick executes and purges the message queue
 setInterval(tick, 20);
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//EXPERIMENTS TO COME BACK TO
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/*
+	//need to replace w/ single quad w/ texture //attempts below...
+	
+	//tried this
+
+	//var mapimage = "images/map_transparent_pow_2.png";
+	var geotexture = coGL.createTextureFromFile(mapimage);
+	console.log(geotexture);
+	var geoshader=coGL.LoadShaderFromFiles("phong_map", "coopGL/shaders/default_vs.glsl", "coopGL/shaders/phong_map.glsl");
+	var geomat = coGL.Material(geoshader, {"uColor":[0.1,1.0,1.0,0.7], "uAmbient":[0, 0, 0, 1], "uTexture":0}, {"0":geotexture});
+	var _geomesh = coGL.loadMeshFromJSON("models/mapbase.json");
+	var geomesh = new coGL.Model(_geomesh, 0.0, 0.0, 0.0);
+	geomesh.material = geomat;
+	modelsToRender.push(geomesh);
+
+
+	//tried that
+
+	var mapimage = "images/map_transparent_pow_2.png"; //***need to write shader for straight-forward texture drawing with transparency.
+	var geotexture = coGL.createTextureFromFile(mapimage, function()
+	{
+		console.log(mapimage);
+		console.log(geotexture);
+		//var geoshader=coGL.LoadShaderFromFiles("phong_map", "coopGL/shaders/default_vs.glsl", "coopGL/shaders/phong_map.glsl");
+		var geoshader=coGL.LoadShaderFromFiles("sprite", "coopGL/shaders/sprite_vs.glsl", "coopGL/shaders/sprite_fs.glsl");		
+		var geomat = new coGL.Material(geoshader, {"uColor":[1.0,1.0,1.0,1.0], "uTexture":0, "uAmbient":[1,1,1,1]}, {"0":geotexture});
+		console.log(geomat);
+		var _geomesh = coGL.loadMeshFromJSON("models/mapbase.json");
+		var geomesh = new coGL.Model(_geomesh, 0.0, 0.0, 0.0);
+		geomesh.material = geomat;
+		modelsToRender.push(geomesh);
+	});
+*/
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//OUTMODED
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/*
+
+	coGL.addRenderingPass("final"). 
+	clearColorV(bgcol).
+	clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT).
+	camera().
+	light(light). //try doing without this
+	renderModels(modelsToRender).
+	execute(function() 
+	{
+		var plane=new coGL.Plane(coGL.mouse.point3d, coGL.mouse.normal); //could come in handy for selection of geographic features
+		plane.getMatrix(cubemodel.modelmatrix);
+
+		if (coGL.mouse.isOnBackground) 
+		{
+			cubemodel.moveTo([0,0,0]);
+		}
+	}).
+	activate();
+
+socket.on("welcome", function(_data)
+{
+		id = _data.id; //consistent with client id on server - seems useful for annotation system?
+		console.log("this is my socket ID: " + id);
+
+		var data = {};
+		queueMsg('GetDC', data); //temporary
+});
+
+socket.on("_GetDC", function(_data)
+{
+	var data = _data;
+	var c = new Collection(data.name, data.collection);
+});
+
+function QueryGeo(_query)
+{
+	console.log("QueryGeo");
+	var data = {query: _query};
+	queueMsg('QueryGeo', data);
+}
+
+socket.on("_QueryGeo", function(_data)
+{
+	var data = _data;
+	console.log("_QueryGeo");
+	console.log(data);
+});
+
+function QueryGeoDB(_query)
+{
+	console.log("QueryGeoDB");
+	var data = {query: _query};
+	queueMsg('QueryGeoDB', data);
+}
+
+socket.on("_QueryGeoDB", function(_data)
+{
+	var data = _data;
+	console.log("_QueryGeoDB");
+	console.log(data);
+});
+
+*/
