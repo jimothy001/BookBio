@@ -4,7 +4,7 @@ var ui;
 //GL
 var coGL;
 var gl;
-var modelsToRender=[];
+var modelsToRender=[]; //models to render is a collection of things with a render funciton they could even represent arbitrary conditional group selectors
 var modelsToSelect=[];
 var geo = [];
 var cameradistance = 50.0;
@@ -38,15 +38,21 @@ function Main()
 	//GL
 	coGL=COGL.init("canvas1");
 	gl=coGL.gl;
-	var mat1=new coGL.Material(coGL.shaders.default, {"uColor":[0.97,0.97,0.97,0.5]});//, "uTexture":0}, {"0":coGL.textures.white});//coGL.Material(coGL.shaders.normal, {"uColor":[0.9,0.8,0.8,1], "uTexture":0}, {"0":coGL.textures.white});
-	var mat2=new coGL.Material(coGL.shaders.cell,{"uColor":[0.7,0.7,0.7,1]}); //, "uSpecular": [1,1,1,50.0], "uAmbient":[0.4,0.4,0.4,1], "uTexture":0}, {"0":coGL.textures.white});//coGL.textures.white
-	
+	var geomat = new coGL.Material(coGL.shaders.default, {"uColor":[0.97,0.97,0.97,0.5]});//, "uTexture":0}, {"0":coGL.textures.white});//coGL.Material(coGL.shaders.normal, {"uColor":[0.9,0.8,0.8,1], "uTexture":0}, {"0":coGL.textures.white});
 
-
-	//GEOGRAPHY// need to replace w/ single quad w/ texture
+	//GEOGRAPHY
 	
+	for(var i=0; i<161; i++)
+	{
+		var _geomesh = coGL.loadMeshFromJSON("models/geo" + i + ".json");
+		var geomesh = new coGL.Model(_geomesh, 0.0, 0.0, 0.0);
+		geomesh.material=mat1;
+		modelsToRender.push(geomesh);
+	}
+
+	//need to replace w/ single quad w/ texture //attempts below...
+
 	//var mapimage = "images/map_transparent_pow_2.png";
-	
 	/*var geotexture = coGL.createTextureFromFile(mapimage);
 	console.log(geotexture);
 	var geoshader=coGL.LoadShaderFromFiles("phong_map", "coopGL/shaders/default_vs.glsl", "coopGL/shaders/phong_map.glsl");
@@ -71,39 +77,28 @@ function Main()
 		modelsToRender.push(geomesh);
 	});*/
 
-	for(var i=0; i<161; i++)
-	{
-		var _geomesh = coGL.loadMeshFromJSON("models/geo" + i + ".json");
-		var geomesh = new coGL.Model(_geomesh, 0.0, 0.0, 0.0);
-		geomesh.material=mat1;
-		modelsToRender.push(geomesh);
-	}
-
-	coGL.enableSelectionPass(modelsToSelect);
+	coGL.enableSelectionPass(modelsToSelect); //this appears to be the only pass that is necessary
 	//coGL.enableDepthPass(modelsToSelect);
-	//coGL.enableUVPass(modelsToSelect);
+	//coGL.enableUVPass(modelsToSelect); //is this perhaps necessary for texture rendering?
 	//coGL.enableWNormalPass(modelsToSelect);
 
-	var viewpoint = vec3.create();
+	var viewpoint = vec3.create(); //starting position of GL camera
 	viewpoint[0] = 20.0;
 	viewpoint[1] = 40.0;
 	viewpoint[2] = 40.0;
-	var targetpoint = vec3.create();
+	var targetpoint = vec3.create(); //starting target of GL camera
 	targetpoint[0] = 2.75;
 	targetpoint[1] = 0.0;
 	targetpoint[2] = 15.0;
-	coGL.camera.setViewPoint(viewpoint).setTargetPoint(targetpoint).setDistance(cameradistance).setFar(120.0).update();
+	coGL.camera.setViewPoint(viewpoint).setTargetPoint(targetpoint).setDistance(cameradistance).setFar(120.0).update(); //set GL start and viewpoint of camera. 
 
-	var light=new coGL.Camera();
+	var light=new coGL.Camera(); //GL light - try doing without this
 	light.easeIn=0.0;
 	light.setDistance(50.0).setFov(60).setAngleXY(0.5).setAngleZ(0.8).update();
 
-	//models to render is a collection of things with a render funciton they could even represent arbitrary conditional group selectors
 	var blur=false;
 	var bsize=2048;
 	var sharedFBO=new coGL.FBO(bsize, bsize, false);
-
-
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//RUNS EVERY FRAME
@@ -112,7 +107,7 @@ function Main()
 		clearColorV(bgcol). //bgcol.color
 		clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT).
 		camera().
-		light(light).
+		light(light). //try doing without this
 		renderModels(modelsToRender).
 		execute(function() 
 		{
