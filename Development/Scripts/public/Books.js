@@ -23,7 +23,7 @@ function Read(event)
 	//console.log(x);
 	if('files' in x)
 	{
-		// Load binary file from desktop //*** this seems to take awhile for some reason
+		// Load file
         loadBinaryFile(event,function(data)
         {
             // Parse it to JSON
@@ -71,16 +71,16 @@ function loadBinaryFile(path, success) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-function Collection(_name, _data)
+function Collection(_name, _data) //constructor
 {
 	console.log("new collection");
 
-	this.name = _name;
+	this.name = _name; 
 	this.size = _data.length;
 	this.editions = []; //collection of editions
 	
-	this.emat =  new coGL.Material(coGL.shaders.normal_color,{"uColor":[1.0, 0.4, 0.9, 0.5], "uLightness": 0.7});
-	this.smat = new coGL.Material(coGL.shaders.normal_color, {"uColor":[1.0, 0.4, 0.9, 0.5], "uLightness": 0.3});
+	this.emat =  new coGL.Material(coGL.shaders.normal_color,{"uColor":[1.0, 0.4, 0.9, 0.5], "uLightness": 0.7}); //***connect this to GetColor
+	this.smat = new coGL.Material(coGL.shaders.normal_color, {"uColor":[1.0, 0.4, 0.9, 0.5], "uLightness": 0.3}); //selection color is opposite of collection color //***connect this to GetColor
 
 	var ci = collections.length; //this collection's index after it is added to collections array
 
@@ -88,10 +88,9 @@ function Collection(_name, _data)
 	{
 		var e = new Edition(ci, i, _data[i], this.emat, this.smat);
 		this.editions.push(e);
-		//this.LogGeo(e);
 	}
 
-	if(geoquery.length > 0) BatchQueryGeo();
+	if(geoquery.length > 0) QueryGeo();
 
 	collections.push(this);
 	console.log("collections length: "+collections.length);
@@ -100,7 +99,6 @@ function Collection(_name, _data)
 Collection.prototype.GetColor = function()
 {
 	var color = [];
-
 	return color;
 }
 
