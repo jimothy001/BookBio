@@ -61,7 +61,7 @@ function loadBinaryFile(path, success) {
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//COLLECTION CLASS
+//COLLECTION CLASS // SQUARES!
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -71,7 +71,7 @@ function loadBinaryFile(path, success) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-function Collection(_name, _data) //constructor
+function Collection(_name, _data)
 {
 	console.log("new collection");
 
@@ -84,25 +84,28 @@ function Collection(_name, _data) //constructor
 
 	var ci = collections.length; //this collection's index after it is added to collections array
 
-	for(var i in _data)
+	for(var i in _data) //instantate editions and add them to collections
 	{
 		var e = new Edition(ci, i, _data[i], this.emat, this.smat);
 		this.editions.push(e);
 	}
 
-	if(geoquery.length > 0) QueryGeo();
+	if(geoquery.length > 0) QueryGeo(); //if there are queries for geographic information... query them.
 
-	collections.push(this);
+	collections.push(this); //add collection to collection of collections
 	console.log("collections length: "+collections.length);
 }
 
-Collection.prototype.GetColor = function()
+//to be connected to emat and smat
+Collection.prototype.SetColors = function() 
 {
+	//process of randomization
 	var color = [];
 	return color;
 }
 
-Collection.prototype.UpdateGeo = function(_edition)
+//updates editions with geographic coordinates - called from GeoResponse when results from geoquery are returned
+Collection.prototype.UpdateGeo = function(_edition) 
 {
 	var ed = _edition;
 
@@ -113,23 +116,7 @@ Collection.prototype.UpdateGeo = function(_edition)
 	}
 }
 
-
-Collection.prototype.ApplyColors = function(_selectededition)
-{
-	for(var i in this.c)
-	{
-		this.editions[i].book.material = this.emat;
-	}
-	_selectededition.book.material = this.smat;
-	
-	modelsToRender = [];
-
-	for(var i in this.editions)
-	{
-		modelsToRender.push(this.editions[i].book);
-	}
-}
-
+//selectivly filters collection content per UI input //***make this flexible
 Collection.prototype.Filter = function(_criteria)
 {
 	if(_criteria == "place")
@@ -241,15 +228,15 @@ Collection.prototype.Filter = function(_criteria)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-var offset = 2.75; //for some reason this is necessary for mapping lg to x.
+var offset = 2.75; //for some reason this is necessary for mapping lg to x. I don't know why.
 
 function Edition(_c, _e, _data, _emat, _smat)
 {
-	//KNOWS ONW PLACE
+	//knows its place in the world
 	this.c = _c; //collection index
 	this.e = _e; //edition index
 	
-	//TEXT INFO
+	//text info
 	this.edition = 0;
 	this.place = "";
 	this.shelf = "";
@@ -278,13 +265,14 @@ function Edition(_c, _e, _data, _emat, _smat)
 	if(_data.ref) this.ref = _data.ref;
 	if(_data.note) this.note = _data.note;
 
-	//GRAPHICS
+	//graphics
 	this.lt = 1.0;
 	this.lg = 1.0;
 	this.x = 50.0;
 	this.y = -25.0;
 
-	if(_data.lg && _data.lt)
+	//geographic data
+	if(_data.lg && _data.lt) //if lt/lg already exists
 	{
 		this.lg = parseFloat(_data.lg); 
 		this.x = Remap(this.lg, -180.0, 180.0, 48.0015+offset, -48.0015+offset);
@@ -292,7 +280,7 @@ function Edition(_c, _e, _data, _emat, _smat)
 		this.lt = parseFloat(_data.lt);
 		this.y = Remap(this.lt, -90.0, 90.0, 24.319, -24.319);
 	}
-	else
+	else //if not, query if from server
 	{
 		if(this.place != "")
 		{
@@ -304,19 +292,16 @@ function Edition(_c, _e, _data, _emat, _smat)
 		else console.log("this.place is empty: " + this.place);
 	}
 
-	if(_data.year || _data.year == null)
+	//temporal data //***allow for continuous remaping of year
+	if(_data.year)
 	{
-		if(_data.year == null) this.z = 41.0;
-		else
-		{
 			this.year = parseInt(_data.year);
 			this.z = Remap(this.year, 1300.0, 1900.0, 0.0, 40.0);
-			//allow for continuous remaping of year.
-		}
 	}
+	else if(_data.year == null) this.z = 41.0;
 	else this.z = 41.0;
 
-	//GeoLine
+	//geo line
 	this.v0 = vec3.create();
 	this.v0[0] = this.x;
 	this.v0[1] = this.y;
@@ -326,7 +311,7 @@ function Edition(_c, _e, _data, _emat, _smat)
 	this.v1[1] = this.y;
 	this.v1[2] = 40.0;
 
-	//Book
+	//book mesh
 	this.easein = 0.95;
 	this.tx = this.x;
 	this.ty = this.y;
@@ -340,10 +325,11 @@ function Edition(_c, _e, _data, _emat, _smat)
 	coGL.selectable(this.book);
 	modelsToSelect.push(this.book);
 	modelsToRender.push(this.book);
-	this.book.onMouseLeave = function() {select = null};
-	this.book.onMouseEnter = function() {select = this.parent;};
+	this.book.onMouseLeave = function() {select = null}; //not going to be clicked :(
+	this.book.onMouseEnter = function() {select = this.parent;}; //I might be clicked :)
 }
 
+//map year to z value
 Edition.prototype.Zmap = function(_map)
 {
 	if(_map == true)
@@ -354,6 +340,7 @@ Edition.prototype.Zmap = function(_map)
 	else this.tz = 41.0;
 }
 
+//update edition with geographic information - called from Collection.UpdateGeo
 Edition.prototype.UpdateGeo = function(u)
 {
 
@@ -368,6 +355,7 @@ Edition.prototype.UpdateGeo = function(u)
 	this.country = u.country;
 }
 
+//called every frame
 Edition.prototype.update = function()
 {
 	 	var ei = this.easein;
@@ -392,17 +380,19 @@ Edition.prototype.update = function()
 		this.v1[2] = 40.0;
 }
 
+//remap
 function Remap(val, from1, to1, from2, to2)
 {
 	var result = (val - from1) / (to1 - from1) * (to2 - from2) + from2;
 	return result;
 }
 
+//add to geoquery que
 function GeoQuery(q)
 {
 	var addnew = true;
 
-	for(var i in geoquery)
+	for(var i in geoquery) //eliminate redundancy
 	{
 		if(geoquery[i].place == q.place)
 		{
@@ -415,6 +405,7 @@ function GeoQuery(q)
 	if(addnew) geoquery.push(q);
 }
 
+//response to queries of geographic information - called from socket.on("_QueryGeo")
 function GeoResponse(r)
 {
 	for(var i in r.addresses)

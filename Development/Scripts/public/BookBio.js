@@ -44,7 +44,7 @@ function Main()
 	{
 		var _geomesh = coGL.loadMeshFromJSON("models/geo" + i + ".json");
 		var geomesh = new coGL.Model(_geomesh, 0.0, 0.0, 0.0);
-		geomesh.material=mat1;
+		geomesh.material=geomat;
 		modelsToRender.push(geomesh);
 	}
 
@@ -117,7 +117,7 @@ function Main()
 		{
 			if(currentselect != null) currentselect.book.material = currentselect.emat; //change current selections material back to original
 			currentselect = select; 
-			currentselect.book.material = select.smat; //apply selection material
+			currentselect.book.material = select.smat; //set selection with selection material
 
 			var t = [select.x, select.y, select.z];
 			coGL.camera.setTargetPoint(t); //set camera target
@@ -138,10 +138,7 @@ function Main()
 			ui.illbutton.setLabel("illustrator: " + select.ill);
 			ui.refbutton.setLabel("reference: " + select.ref);
 			ui.notebutton.setLabel("note: " + select.note); //FIND A WAY FOR PEOPLE TO ADD NOTES
-
-			collections[0].ApplyColors(currentselect);
 		}
-
 	});
 
 	//zoom in, zoom out

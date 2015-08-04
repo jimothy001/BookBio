@@ -79,9 +79,6 @@ db.open(function(err, db) {
     	{safe:false}, 					//unsafe mode, if the collection already exists just give us the existing one
     	function(err, collection) {		//this function is called as soon as the databse has either found or created a collection with the requested name
     		GEO=collection;	//set the global variable theCollection to the newly found collection
-    		
-
-    		DC = PopulateDC(_DC);
     });
   }
 });
@@ -377,7 +374,7 @@ var _DC = __DC.getDC();
 var DC;
 
 
-function PopulateDC(_DC)
+function PopulateDC(_DC) //called from db.createCollection
 {
 	SortDC(_DC);
 
