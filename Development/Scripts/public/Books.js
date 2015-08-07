@@ -1,3 +1,6 @@
+//GENERAL
+var ui;
+
 var collections = [];
 var select= null;
 var currentselect = null;
@@ -33,16 +36,19 @@ function Read(event)
 	    	var name = sheet_name;
 	    	var data = XLSX.utils.sheet_to_json(worksheet); //super useful!
 
-	    	var c = new Collection(name, data);
+	    	var c = new Collection(name, data, worksheet);
 
 	    	//example of reading individual cells in a worksheet
 	    	/*for(var i in worksheet)
 	    	{
 	    		if(i[0] === '!') continue;
-	    		console.log(i + " :" + " " + i[0] + " " + worksheet[i].v);
-
+	    		else if(i[1] == '1')
+	    		{
+	    			console.log(i + " :" + " " + i[0] + " " + worksheet[i].v);
+	    			console.log(i + " :" + " " + i[1] + " " + worksheet[i].v);
+	    		}
+	    		else break;
 	    		//var edition = {};
-
 	    	}*/
         });
 	}
@@ -71,7 +77,7 @@ function loadBinaryFile(path, success) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-function Collection(_name, _data)
+function Collection(_name, _data, _worksheet)
 {
 	console.log("new collection");
 
@@ -94,6 +100,8 @@ function Collection(_name, _data)
 
 	collections.push(this); //add collection to collection of collections
 	console.log("collections length: "+collections.length);
+
+	ui.AddCollection(ci, this.name, _worksheet);
 }
 
 //to be connected to emat and smat
@@ -116,6 +124,211 @@ Collection.prototype.UpdateGeo = function(_edition)
 	}
 }
 
+//selectivly filters collection content per UI input //***make this flexible
+Collection.prototype.Filter = function(_ix)
+{
+	
+	for(var i in this.editions)
+	{
+		if(this.editions[i].bibdata[_ix] == "" || this.editions[i].bibdata[_ix] == 0) this.editions[i].Zmap(false); //this.editions[i].bibdata[_ix] == "" || 
+		else this.editions[i].Zmap(true);
+	}
+	
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//EDITION CLASS
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+var offset = 2.75; //for some reason this is necessary for mapping lg to x. I don't know why.
+
+function Edition(_c, _e, _data, _emat, _smat)
+{
+	//knows its place in the world
+	this.c = _c; //collection index
+	this.e = _e; //edition index
+	
+	this.bibfields = [];
+	this.bibdata = [];
+
+	//text info
+	for(var i in _data)
+	{
+		this.bibfields.push(i);
+		this.bibdata.push(_data[i]);
+	}
+
+	//graphics
+	this.place = "";
+	this.lt = 1.0;
+	this.lg = 1.0;
+	this.x = 50.0;
+	this.y = -25.0;
+
+	//geographic data
+	for(var i = 0; i < this.bibfields.length; i++)
+	{
+		if(this.bibfields[i]+"" == "place") this.place = this.bibdata[i];
+		else if(this.bibfields[i]+"" == "lt") this.lt = this.bibdata[i];
+		else if(this.bibfields[i]+"" == "lg") this.lg = this.bibdata[i];
+	}
+
+	if(this.lt == 1.0 && this.lg == 1.0)
+	{
+		if(this.place != "")
+		{
+			var address = [{c: this.c, e: this.e}]; //nested addresses
+			var query = {addresses: address, place: this.place + ""};
+			
+			GeoQuery(query);
+		}
+	}
+
+	//temporal data //***allow for continuous remaping of year
+	if(_data.year)
+	{
+			
+			this.year = parseInt(_data.year);
+			this.z = Remap(this.year, 1300.0, 1900.0, 0.0, 40.0);
+	}
+	else if(_data.year == null) this.z = 41.0;
+	else this.z = 41.0;
+
+	//geo line
+	this.v0 = vec3.create();
+	this.v0[0] = this.x;
+	this.v0[1] = this.y;
+	this.v0[2] = 0.0;
+	this.v1 = vec3.create();
+	this.v1[0] = this.x;
+	this.v1[1] = this.y;
+	this.v1[2] = 40.0;
+
+	//book mesh
+	this.easein = 0.95;
+	this.tx = this.x;
+	this.ty = this.y;
+	this.tz = this.z;
+
+	this.emat = _emat;
+	this.smat = _smat;
+	this.book = new coGL.Model(coGL.stockMeshes.edition, this.x, this.y, this.z);
+	this.book.material = this.emat;
+	this.book.parent = this;
+	coGL.selectable(this.book);
+	modelsToSelect.push(this.book);
+	modelsToRender.push(this.book);
+	this.book.onMouseLeave = function() {select = null}; //not going to be clicked :(
+	this.book.onMouseEnter = function() {select = this.parent;}; //I might be clicked :)
+}
+
+//map year to z value
+Edition.prototype.Zmap = function(_map)
+{
+	if(_map == true)
+	{
+		if(this.year != null) this.tz = Remap(this.year, 1300.0, 1900.0, 0.0, 40.0);
+		else this.tz = 41.0;
+	}
+	else this.tz = 41.0;
+}
+
+//update edition with geographic information - called from Collection.UpdateGeo
+Edition.prototype.UpdateGeo = function(u)
+{
+	console.log("UpdateGeo");
+
+	this.lt = parseFloat(u.lt);
+	this.ty = Remap(this.lt, -90.0, 90.0, 24.319, -24.319);
+
+	this.lg = parseFloat(u.lg); 
+	this.tx = Remap(this.lg, -180.0, 180.0, 48.0015+offset, -48.0015+offset);
+
+	this.city = u.city;
+	this.territory = u.territory;
+	this.country = u.country;
+}
+
+//called every frame
+Edition.prototype.update = function()
+{
+	 	var ei = this.easein;
+	 	var eo = 1.0 - ei;
+	 	this.x = this.x * ei + this.tx * eo;
+	 	this.y = this.y * ei + this.ty * eo;
+	 	this.z = this.z * ei + this.tz * eo;
+
+	 	//Mesh Update
+	 	var v = vec3.create();
+		v[0] = this.x;
+		v[1] = this.y;
+		v[2] = this.z;
+		this.book.setLocation(v);
+
+		//GeoLine Update
+		this.v0[0] = this.x;
+		this.v0[1] = this.y;
+		this.v0[2] = 0.0;
+		this.v1[0] = this.x;
+		this.v1[1] = this.y;
+		this.v1[2] = 40.0;
+}
+
+//remap
+function Remap(val, from1, to1, from2, to2)
+{
+	var result = (val - from1) / (to1 - from1) * (to2 - from2) + from2;
+	return result;
+}
+
+//add to geoquery que
+function GeoQuery(q)
+{
+	var addnew = true;
+
+	for(var i in geoquery) //eliminate redundancy
+	{
+		if(geoquery[i].place == q.place)
+		{
+			geoquery[i].addresses.push(q.addresses[0]);
+			addnew = false;
+			break;
+		}
+	}
+
+	if(addnew) geoquery.push(q);
+}
+
+//response to queries of geographic information - called from socket.on("_QueryGeo")
+function GeoResponse(r)
+{
+	for(var i in r.addresses)
+	{
+		var c = r.addresses[i].c;
+		var e = r.addresses[i].e;
+
+		collections[c].editions[e].UpdateGeo(r);
+	}
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//OUTMODED
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/*
 //selectivly filters collection content per UI input //***make this flexible
 Collection.prototype.Filter = function(_criteria)
 {
@@ -218,18 +431,6 @@ Collection.prototype.Filter = function(_criteria)
 	}
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//EDITION CLASS
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-var offset = 2.75; //for some reason this is necessary for mapping lg to x. I don't know why.
-
 function Edition(_c, _e, _data, _emat, _smat)
 {
 	//knows its place in the world
@@ -329,90 +530,4 @@ function Edition(_c, _e, _data, _emat, _smat)
 	this.book.onMouseEnter = function() {select = this.parent;}; //I might be clicked :)
 }
 
-//map year to z value
-Edition.prototype.Zmap = function(_map)
-{
-	if(_map == true)
-	{
-		if(this.year != null) this.tz = Remap(this.year, 1300.0, 1900.0, 0.0, 40.0);
-		else this.tz = 41.0;
-	}
-	else this.tz = 41.0;
-}
-
-//update edition with geographic information - called from Collection.UpdateGeo
-Edition.prototype.UpdateGeo = function(u)
-{
-
-	this.lt = parseFloat(u.lt);
-	this.ty = Remap(this.lt, -90.0, 90.0, 24.319, -24.319);
-
-	this.lg = parseFloat(u.lg); 
-	this.tx = Remap(this.lg, -180.0, 180.0, 48.0015+offset, -48.0015+offset);
-
-	this.city = u.city;
-	this.territory = u.territory;
-	this.country = u.country;
-}
-
-//called every frame
-Edition.prototype.update = function()
-{
-	 	var ei = this.easein;
-	 	var eo = 1.0 - ei;
-	 	this.x = this.x * ei + this.tx * eo;
-	 	this.y = this.y * ei + this.ty * eo;
-	 	this.z = this.z * ei + this.tz * eo;
-
-	 	//Mesh Update
-	 	var v = vec3.create();
-		v[0] = this.x;
-		v[1] = this.y;
-		v[2] = this.z;
-		this.book.setLocation(v);
-
-		//GeoLine Update
-		this.v0[0] = this.x;
-		this.v0[1] = this.y;
-		this.v0[2] = 0.0;
-		this.v1[0] = this.x;
-		this.v1[1] = this.y;
-		this.v1[2] = 40.0;
-}
-
-//remap
-function Remap(val, from1, to1, from2, to2)
-{
-	var result = (val - from1) / (to1 - from1) * (to2 - from2) + from2;
-	return result;
-}
-
-//add to geoquery que
-function GeoQuery(q)
-{
-	var addnew = true;
-
-	for(var i in geoquery) //eliminate redundancy
-	{
-		if(geoquery[i].place == q.place)
-		{
-			geoquery[i].addresses.push(q.addresses[0]);
-			addnew = false;
-			break;
-		}
-	}
-
-	if(addnew) geoquery.push(q);
-}
-
-//response to queries of geographic information - called from socket.on("_QueryGeo")
-function GeoResponse(r)
-{
-	for(var i in r.addresses)
-	{
-		var c = r.addresses[i].c;
-		var e = r.addresses[i].e;
-
-		collections[c].editions[e].UpdateGeo(r);
-	}
-}
+*/

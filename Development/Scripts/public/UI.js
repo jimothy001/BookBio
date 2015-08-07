@@ -2,6 +2,54 @@
 
 	function UI()
 	{
+		this.parentstack=new CO.UIStack(document.body).setLabel("UI").setCollapsible(true);
+		this.parentstack.setLocation(80+"%", 1+"%", "fixed").setSize(19.5+"%");
+
+		this.upload = this.parentstack.addButton("upload").setOnPressed(function(e)
+		{
+			var x = document.getElementById("upload");
+			console.log(x);
+			x.click();
+		});
+
+		this.stacks = [];
+
+		return this;
+	}
+
+
+	UI.prototype.AddCollection = function(_ix, _name, _worksheet)
+	{
+		var stack = this.parentstack.addStack(""+_name).setCollapsible(true);
+		stack.ix = _ix;
+		stack.buttons = [];
+		stack.buttonvalues = [];
+
+		var ix = 0;
+		
+		for(var i in _worksheet)
+		{
+			if(i[0] === '!') continue;
+			if(i[1] == '1')
+			{
+				stack.buttonvalues.push("...");
+				var button = stack.addButton(_worksheet[i].v + ": " + stack.buttonvalues[ix]).setOnPressed(function(e) 
+					{
+						collections[stack.ix].Filter(ix); //match indexes for buttons vs. edition fields
+					});
+				button.ix = ix;
+				stack.buttons.push(button);
+				ix++;
+			}
+			else break;
+		}
+
+		this.stacks.push(stack);
+	}
+
+
+	/*function UI()
+	{
 		this.year = 0;
 		this.edition = 0;
 		this.place = "";
@@ -36,11 +84,11 @@
 		this.notebutton = this.stack.addButton("note: " + this.note).setOnPressed(function(e) {collections[0].Filter("note");});
 
 		//this.geofetch = this.parentstack.addStack("geo query").setCollapsible(true);
-		/*this.geofetch.addTextInput("type and press enter").setOnCommited(function(v)
-		{
-			if(v != "" || v != " ") QueryGeoDB(v);//QueryGeo(v);
-			console.log("from text query field: " + v);
-		});*/
+		//this.geofetch.addTextInput("type and press enter").setOnCommited(function(v)
+		//{
+		//	if(v != "" || v != " ") QueryGeoDB(v);//QueryGeo(v);
+		//	console.log("from text query field: " + v);
+		//});
 
 		this.upload = this.parentstack.addButton("upload").setOnPressed(function(e)
 		{
@@ -50,4 +98,4 @@
 		});
 
 		return this;
-	}
+	}*/
