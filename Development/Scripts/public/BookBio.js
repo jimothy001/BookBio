@@ -1,6 +1,3 @@
-//GENERAL
-var ui;
-
 //GL
 var coGL;
 var gl;
@@ -32,7 +29,7 @@ var query; //query geographic data
 function Main()
 {	
 	//UI
-	ui = UI();
+	ui = new UI();
 
 	//GL
 	coGL=COGL.init("canvas1");
@@ -124,20 +121,14 @@ function Main()
 
 			console.log(currentselect.smat);
 
-			//ui fields //MAKE FLEXIBLE
-			ui.citybutton.setLabel("place: " + select.place);
-			ui.shelfbutton.setLabel("shelf: " + select.shelf);
-			ui.matbutton.setLabel("material: " + select.bmat);
-			ui.formatbutton.setLabel("format: " + select.format);
-			ui.foliosbutton.setLabel("folios: " + select.folios);
-			ui.periodbutton.setLabel("period: " + select.period);
-			ui.yearbutton.setLabel("year: " + select.year);
-			ui.langbutton.setLabel("language: " + select.lang);
-			ui.vaccbutton.setLabel("verbal accretions: " + select.vacc);
-			ui.visbutton.setLabel("visuals: " + select.vis);
-			ui.illbutton.setLabel("illustrator: " + select.ill);
-			ui.refbutton.setLabel("reference: " + select.ref);
-			ui.notebutton.setLabel("note: " + select.note); //FIND A WAY FOR PEOPLE TO ADD NOTES
+			var c = currentselect.c;
+			var e = currentselect.e;
+
+			for(var i = 0; i < ui.stacks[c].buttons.length; i++)
+			{
+				var l = currentselect.bibfields[i] + ": " + currentselect.bibdata[i];
+				ui.stacks[c].buttons[i].setLabel(l);
+			}
 		}
 	});
 
@@ -221,7 +212,7 @@ function queueMsg(_msg, _data)
 	queue.push([_msg,_data]); // queue is now treated as a numerical array
 }
 
-//one message at a time
+//one message at a time - prevents server from being overwhelmed
 function tick()
 {
 	if(queue.length > 0)
@@ -291,6 +282,37 @@ setInterval(tick, 20);
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /*
+
+canvas1.addEventListener("mousedown", function(e) 
+{
+	//focus on item: set camera target and set UI values
+	if (select != null) //(e.which==1 && coGL.mouseOverObject) 
+	{
+		if(currentselect != null) currentselect.book.material = currentselect.emat; //change current selections material back to original
+		currentselect = select; 
+		currentselect.book.material = select.smat; //set selection with selection material
+
+		var t = [select.x, select.y, select.z];
+		coGL.camera.setTargetPoint(t); //set camera target
+
+		console.log(currentselect.smat);
+
+		//ui fields //MAKE FLEXIBLE
+		ui.citybutton.setLabel("place: " + select.place);
+		ui.shelfbutton.setLabel("shelf: " + select.shelf);
+		ui.matbutton.setLabel("material: " + select.bmat);
+		ui.formatbutton.setLabel("format: " + select.format);
+		ui.foliosbutton.setLabel("folios: " + select.folios);
+		ui.periodbutton.setLabel("period: " + select.period);
+		ui.yearbutton.setLabel("year: " + select.year);
+		ui.langbutton.setLabel("language: " + select.lang);
+		ui.vaccbutton.setLabel("verbal accretions: " + select.vacc);
+		ui.visbutton.setLabel("visuals: " + select.vis);
+		ui.illbutton.setLabel("illustrator: " + select.ill);
+		ui.refbutton.setLabel("reference: " + select.ref);
+		ui.notebutton.setLabel("note: " + select.note); //FIND A WAY FOR PEOPLE TO ADD NOTES
+	}
+});
 
 	coGL.addRenderingPass("final"). 
 	clearColorV(bgcol).
