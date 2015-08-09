@@ -154,6 +154,17 @@ io.sockets.on('connection', function (socket) {
 		}
 	});
 
+	socket.on('SearchQuery', function(_data)
+	{
+		var query = _data;
+		if (query.length != 0){
+			console.log(query);
+			// push to goequeries lookalike for searchquery
+			// find out what pushing to geoqueries does
+			// make ajax request to ocl
+		}
+	});
+
 });
 
 

@@ -49,5 +49,10 @@
 			x.click();
 		});
 
+		this.search = this.parentstack.addTextInput("", "search").setOnCommited(function(query){
+			
+			queueMsg('SearchQuery', query)
+		});
+
 		return this;
 	}
