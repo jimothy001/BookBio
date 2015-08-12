@@ -18,7 +18,52 @@
 	}
 
 
-	UI.prototype.AddCollection = function(_ix, _name, _worksheet)
+	UI.prototype.AddCollection = function(_ix, _name, _keys)
+	{
+		var stack = this.parentstack.addStack(""+_name).setCollapsible(true);		
+		stack.ix = _ix;
+		stack.buttons = {};
+		stack.keys = _keys;
+		
+		for(var k in _keys)
+		{
+			//stack.buttonvalues.push("...");
+			var key = _keys[k]+"";
+			var button = stack.addButton();
+			button.key = key;
+			button.val = "...";
+			button.setLabel(button.key + ": " + button.val);
+			button.setOnPressed(function(e) 
+			{
+				console.log("collections index: " + stack.ix + " button index " + this.key)
+				collections[stack.ix].Filter(this.key); //match indexes for buttons vs. edition fields
+			});
+			stack.buttons[key] = button;
+		}
+
+		stack.setOnPressed(function(e)
+		{	
+			var c = collections[this.ix];
+			if(c.active == true) c.Deactivate();
+			else c.Activate();
+		});
+
+
+		this.stacks.push(stack);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//OUTMODED
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/*UI.prototype.AddCollection = function(_ix, _name, _worksheet)
 	{
 		var stack = this.parentstack.addStack(""+_name).setCollapsible(true);
 		stack.ix = _ix;
@@ -33,11 +78,15 @@
 			if(i[1] == '1')
 			{
 				stack.buttonvalues.push("...");
-				var button = stack.addButton(_worksheet[i].v + ": " + stack.buttonvalues[ix]).setOnPressed(function(e) 
-					{
-						collections[stack.ix].Filter(ix); //match indexes for buttons vs. edition fields
-					});
+				
+				var button = stack.addButton();
 				button.ix = ix;
+				button.setLabel(_worksheet[i].v + ": " + stack.buttonvalues[button.ix]);
+				button.setOnPressed(function(e) 
+					{
+						console.log("collections index: " + stack.ix + " button index " + this.ix)
+						collections[stack.ix].Filter(this.ix); //match indexes for buttons vs. edition fields
+					});
 				stack.buttons.push(button);
 				ix++;
 			}
@@ -48,7 +97,7 @@
 	}
 
 
-	/*function UI()
+	function UI()
 	{
 		this.year = 0;
 		this.edition = 0;
