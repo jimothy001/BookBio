@@ -618,6 +618,20 @@ CO.UIContainer= function(_parent) {
 
 	this.addClient();
 
+	//jy
+	this.onPressed=null;
+
+	var that=this;
+
+	this.element.onmousedown=function(e) {
+		if (that.onPressed) {
+			that.onPressed.call(that, e);
+			e.stopPropagation();
+		}
+
+	}
+	//jy
+
 	this.prependCssClass("UIContainer");
 }
 
@@ -668,7 +682,10 @@ CO.UIContainer.prototype.setCollapsed=function(_state) {
 	return this;
 }
 
-
+CO.UIContainer.prototype.setOnPressed=function(_callbak) { //jy
+	this.onPressed=_callbak;
+	return this;
+}
 
 CO.UIContainer.prototype.setCollapsible=function(_iscollapsible) {
 	var that=this;

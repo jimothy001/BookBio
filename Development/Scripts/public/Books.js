@@ -4,6 +4,8 @@ var ui;
 var collections = [];
 var select= null;
 var currentselect = null;
+var unmat;
+var selunmat;
 var geoinfo = []; //This should be checked with each new set of bibliographic results for each new collection for to prevent redundant queries to 3rd parties.
 var geoquery = [];
 
@@ -34,22 +36,13 @@ function Read(event)
 	    	var sheet_name = workbook.SheetNames[0]; //allow multiple sheets
 	    	var worksheet = workbook.Sheets[sheet_name];
 	    	var name = sheet_name;
+	    	var keys = GetJSONKeys(worksheet);
 	    	var data = XLSX.utils.sheet_to_json(worksheet); //super useful!
+	    	
+	    	//var data = GetJSONFromWorkSheet(worksheet);
+	    	//console.log(data);
 
-	    	var c = new Collection(name, data, worksheet);
-
-	    	//example of reading individual cells in a worksheet
-	    	/*for(var i in worksheet)
-	    	{
-	    		if(i[0] === '!') continue;
-	    		else if(i[1] == '1')
-	    		{
-	    			console.log(i + " :" + " " + i[0] + " " + worksheet[i].v);
-	    			console.log(i + " :" + " " + i[1] + " " + worksheet[i].v);
-	    		}
-	    		else break;
-	    		//var edition = {};
-	    	}*/
+	    	var c = new Collection(name, data, keys);
         });
 	}
 	else console.log("no files in upload");
@@ -58,13 +51,32 @@ function Read(event)
 function loadBinaryFile(path, success) {
     var files = path.target.files;
     var reader = new FileReader();
-    var name = files[0].name;
+    //var name = files[0].name;
     reader.onload = function(e) {
         var data = e.target.result;
         success(data);
     };
     reader.readAsBinaryString(files[0]);
 }
+
+function GetJSONKeys(_worksheet)
+{
+	var keys = [];
+
+	for(var i in _worksheet)
+	{
+		if(i[0] === '!') continue;
+		if(i[1] == '1')
+		{
+			keys.push(_worksheet[i].v);
+		}
+		else break;
+	}
+
+	return keys;
+}
+
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //COLLECTION CLASS // SQUARES!
@@ -77,22 +89,28 @@ function loadBinaryFile(path, success) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-function Collection(_name, _data, _worksheet)
+function Collection(_name, _data, _keys)
 {
 	console.log("new collection");
 
 	this.name = _name; 
 	this.size = _data.length;
+	this.keys = _keys;
 	this.editions = []; //collection of editions
-	
-	this.emat =  new coGL.Material(coGL.shaders.normal_color,{"uColor":[1.0, 0.4, 0.9, 0.5], "uLightness": 0.7}); //***connect this to GetColor
-	this.smat = new coGL.Material(coGL.shaders.normal_color, {"uColor":[1.0, 0.4, 0.9, 0.5], "uLightness": 0.3}); //selection color is opposite of collection color //***connect this to GetColor
+	this.active = true;
+	var color = this.SetColors();
+	this.emat =  new coGL.Material(coGL.shaders.normal_color,{"uColor":color, "uLightness": 0.7});
+	this.smat = new coGL.Material(coGL.shaders.normal_color, {"uColor":color, "uLightness": 0.3});
+	//this.emat =  new coGL.Material(coGL.shaders.normal_color,{"uColor":[1.0, 0.4, 0.9, 0.5], "uLightness": 0.7});
+	//this.smat = new coGL.Material(coGL.shaders.normal_color, {"uColor":[1.0, 0.4, 0.9, 0.5], "uLightness": 0.3});
+	this.unmat = unmat;
+	this.selunmat = selunmat;
 
 	var ci = collections.length; //this collection's index after it is added to collections array
 
 	for(var i in _data) //instantate editions and add them to collections
 	{
-		var e = new Edition(ci, i, _data[i], this.emat, this.smat);
+		var e = new Edition(ci, i, this.keys, _data[i], this.emat);
 		this.editions.push(e);
 	}
 
@@ -101,14 +119,19 @@ function Collection(_name, _data, _worksheet)
 	collections.push(this); //add collection to collection of collections
 	console.log("collections length: "+collections.length);
 
-	ui.AddCollection(ci, this.name, _worksheet);
+	ui.AddCollection(ci, this.name, this.keys);
 }
 
 //to be connected to emat and smat
 Collection.prototype.SetColors = function() 
 {
 	//process of randomization
-	var color = [];
+	var r = Math.random();
+	var g = Math.random();
+	var b = Math.random();
+	var a = 0.5;
+
+	var color = [r,g,b,a];
 	return color;
 }
 
@@ -124,14 +147,46 @@ Collection.prototype.UpdateGeo = function(_edition)
 	}
 }
 
+Collection.prototype.Activate = function()
+{
+	console.log("Activate");
+	this.active = true;
+	for(var e in this.editions)
+	{
+		this.editions[e].active = true;
+		this.editions[e].book.material = this.editions[e].currentmat;
+	}
+}
+
+Collection.prototype.Deactivate = function()
+{
+	console.log("Deactivate");
+	this.active = false;
+	for(var e in this.editions)
+	{
+		this.editions[e].active = false;
+		this.editions[e].book.material = unmat;
+	}
+}
+
 //selectivly filters collection content per UI input //***make this flexible
-Collection.prototype.Filter = function(_ix)
+Collection.prototype.Filter = function(_key)
 {
 	
 	for(var i in this.editions)
 	{
-		if(this.editions[i].bibdata[_ix] == "" || this.editions[i].bibdata[_ix] == 0) this.editions[i].Zmap(false); //this.editions[i].bibdata[_ix] == "" || 
-		else this.editions[i].Zmap(true);
+		var val = this.editions[i].data[_key];
+
+		if(val == null || val == 0 || val == "") 
+		{
+			this.editions[i].book.material = this.unmat;
+			this.editions[i].active = false;
+		}
+		else 
+		{	
+			this.editions[i].book.material = this.emat;
+			this.editions[i].active = true;
+		}
 	}
 	
 }
@@ -148,40 +203,34 @@ Collection.prototype.Filter = function(_ix)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 var offset = 2.75; //for some reason this is necessary for mapping lg to x. I don't know why.
 
-function Edition(_c, _e, _data, _emat, _smat)
+function Edition(_c, _e, _keys, _data, _emat)
 {
 	//knows its place in the world
 	this.c = _c; //collection index
 	this.e = _e; //edition index
-	
-	this.bibfields = [];
-	this.bibdata = [];
+	this.active = true;
+	this.data = {};
 
 	//text info
-	for(var i in _data)
+	for(var k in _keys)
 	{
-		this.bibfields.push(i);
-		this.bibdata.push(_data[i]);
+		var key = _keys[k]+"";
+		if(_data[key]) this.data[key] = _data[key];
+		else this.data[key] = null;
 	}
 
 	//graphics
-	this.place = "";
+	this.place = this.data.place;
 	this.lt = 1.0;
 	this.lg = 1.0;
+	this.year = this.data.year;
 	this.x = 50.0;
 	this.y = -25.0;
-
-	//geographic data
-	for(var i = 0; i < this.bibfields.length; i++)
-	{
-		if(this.bibfields[i]+"" == "place") this.place = this.bibdata[i];
-		else if(this.bibfields[i]+"" == "lt") this.lt = this.bibdata[i];
-		else if(this.bibfields[i]+"" == "lg") this.lg = this.bibdata[i];
-	}
+	this.z = 41.0;
 
 	if(this.lt == 1.0 && this.lg == 1.0)
 	{
-		if(this.place != "")
+		if(this.place != null)
 		{
 			var address = [{c: this.c, e: this.e}]; //nested addresses
 			var query = {addresses: address, place: this.place + ""};
@@ -191,14 +240,11 @@ function Edition(_c, _e, _data, _emat, _smat)
 	}
 
 	//temporal data //***allow for continuous remaping of year
-	if(_data.year)
+	if(this.year != null)
 	{
-			
 			this.year = parseInt(_data.year);
 			this.z = Remap(this.year, 1300.0, 1900.0, 0.0, 40.0);
 	}
-	else if(_data.year == null) this.z = 41.0;
-	else this.z = 41.0;
 
 	//geo line
 	this.v0 = vec3.create();
@@ -217,9 +263,9 @@ function Edition(_c, _e, _data, _emat, _smat)
 	this.tz = this.z;
 
 	this.emat = _emat;
-	this.smat = _smat;
+	this.currentmat = this.emat;
 	this.book = new coGL.Model(coGL.stockMeshes.edition, this.x, this.y, this.z);
-	this.book.material = this.emat;
+	this.book.material = this.currentmat;
 	this.book.parent = this;
 	coGL.selectable(this.book);
 	modelsToSelect.push(this.book);
@@ -317,6 +363,7 @@ function GeoResponse(r)
 	}
 }
 
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //OUTMODED
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -329,6 +376,61 @@ function GeoResponse(r)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /*
+
+function GetJSONFromWorkSheet(_worksheet)
+{
+	var data = {"fields": [], "editions": [];
+	data.editions.push([]);
+
+	var colcheck = 1;
+
+	for(var i in _worksheet)
+	{
+		//if(i[0] === '!') continue;
+		if(i.length < 3 && i[1] == '1')
+		{
+			//if(i[0] === '!') continue;
+			data.fields.push(_worksheet[i].v);
+		}
+		else
+		{
+			if(colcheck % (data.fields.length + 1) == 0)
+			{
+				var edition = [];
+				data.editions.push(edition);
+				colcheck = 1;
+			}
+			else
+			{
+				if(i[0] === '!') data.editions[j].push("parp");
+				//if(_worksheet[i].v == null) data.editions[j].push("parp");
+				else
+				{
+					var j = data.editions.length - 1;
+					var v = _worksheet[i].v;
+					data.editions[j].push(v);
+				}
+				colcheck++;
+			}
+		}
+	}
+	
+	return data;
+}
+
+//example of reading individual cells in a worksheet
+for(var i in worksheet)
+{
+	if(i[0] === '!') continue;
+	else if(i[1] == '1')
+	{
+		console.log(i + " :" + " " + i[0] + " " + worksheet[i].v);
+		console.log(i + " :" + " " + i[1] + " " + worksheet[i].v);
+	}
+	else break;
+	//var edition = {};
+}
+
 //selectivly filters collection content per UI input //***make this flexible
 Collection.prototype.Filter = function(_criteria)
 {
