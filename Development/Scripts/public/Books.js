@@ -38,7 +38,9 @@ function Read(event)
 	    	var name = sheet_name;
 	    	var keys = GetJSONKeys(worksheet);
 	    	var data = XLSX.utils.sheet_to_json(worksheet); //super useful!
-	    	
+
+	    	testWriteFile(workbook);
+
 	    	//var data = GetJSONFromWorkSheet(worksheet);
 	    	//console.log(data);
 
@@ -57,6 +59,24 @@ function loadBinaryFile(path, success) {
         success(data);
     };
     reader.readAsBinaryString(files[0]);
+}
+
+function testWriteFile(workbook)
+{
+	/* bookType can be 'xlsx' or 'xlsm' or 'xlsb' */
+	var wopts = { bookType:'xlsx', bookSST:false, type:'binary' };
+
+	var wbout = XLSX.write(workbook,wopts);
+
+	function s2ab(s) {
+	  var buf = new ArrayBuffer(s.length);
+	  var view = new Uint8Array(buf);
+	  for (var i=0; i!=s.length; ++i) view[i] = s.charCodeAt(i) & 0xFF;
+	  return buf;
+	}
+
+	/* the saveAs call downloads a file on the local machine */
+	saveAs(new Blob([s2ab(wbout)],{type:""}), "test.xlsx");
 }
 
 function GetJSONKeys(_worksheet)
@@ -101,8 +121,6 @@ function Collection(_name, _data, _keys)
 	var color = this.SetColors();
 	this.emat =  new coGL.Material(coGL.shaders.normal_color,{"uColor":color, "uLightness": 0.7});
 	this.smat = new coGL.Material(coGL.shaders.normal_color, {"uColor":color, "uLightness": 0.3});
-	//this.emat =  new coGL.Material(coGL.shaders.normal_color,{"uColor":[1.0, 0.4, 0.9, 0.5], "uLightness": 0.7});
-	//this.smat = new coGL.Material(coGL.shaders.normal_color, {"uColor":[1.0, 0.4, 0.9, 0.5], "uLightness": 0.3});
 	this.unmat = unmat;
 	this.selunmat = selunmat;
 
@@ -131,6 +149,7 @@ Collection.prototype.SetColors = function()
 	var b = Math.random();
 	var a = 0.5;
 
+	//var color = [1.0, 0.4, 0.9, 0.5];
 	var color = [r,g,b,a];
 	return color;
 }
