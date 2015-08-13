@@ -9,7 +9,7 @@ function UI()
 
 	this.upload = this.parentstack.addButton("upload").setOnPressed(function(e){Upload()});
 	this.downloadimage = this.parentstack.addButton("download model image").setOnPressed(function(e){DownloadImage()});
-	this.downloadcuratedset = this.parentstack.addButton("download curated set").setOnPressed(function(e){});
+	this.downloadcuratedset = this.parentstack.addButton("download curated set").setOnPressed(function(e){DownloadSet()});
 
 	this.stacks = [];
 
@@ -73,7 +73,7 @@ function download()
 
 function DownloadSet()
 {
-	
+	Write();
 }
 
 

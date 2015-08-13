@@ -9,6 +9,8 @@ var selunmat;
 var geoinfo = []; //This should be checked with each new set of bibliographic results for each new collection for to prevent redundant queries to 3rd parties.
 var geoquery = [];
 
+var emptyworkbook;
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //READ FROM SPREADSHEET
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -20,6 +22,24 @@ var geoquery = [];
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+function ReadyWorkbook()
+{
+    var path = document.getElementById("blankworkbook").src;
+    console.log(path);
+
+    loadBinaryFile(path,function(data) //load file
+    {
+    	var workbook = XLSX.read(data,{type:'binary'});
+    	
+    	console.log(workbook);
+
+    	for(var i in workbook.SheetNames) //each sheet is treated as a separate collection
+    	{
+
+    	}
+    });
+}
+
 //can use js-xlsx to read xls, xlsx, csv + ods and write to xls, csv, json + js objects - https://github.com/SheetJS/js-xlsx
 function Read(event)
 {
@@ -28,23 +48,19 @@ function Read(event)
 	//console.log(x);
 	if('files' in x)
 	{
-		// Load file
-        loadBinaryFile(event,function(data)
+        loadBinaryFile(event,function(data) //load file
         {
-            // Parse it to JSON
 	    	var workbook = XLSX.read(data,{type:'binary'});
-	    	var sheet_name = workbook.SheetNames[0]; //allow multiple sheets
-	    	var worksheet = workbook.Sheets[sheet_name];
-	    	var name = sheet_name;
-	    	var keys = GetJSONKeys(worksheet);
-	    	var data = XLSX.utils.sheet_to_json(worksheet); //super useful!
+	    	for(var i in workbook.SheetNames) //each sheet is treated as a separate collection
+	    	{
+		    	var sheet_name = workbook.SheetNames[i];
+		    	var worksheet = workbook.Sheets[sheet_name];
+		    	var name = sheet_name;
+		    	var keys = GetJSONKeys(worksheet);
+		    	var data = XLSX.utils.sheet_to_json(worksheet); //super useful!
 
-	    	testWriteFile(workbook);
-
-	    	//var data = GetJSONFromWorkSheet(worksheet);
-	    	//console.log(data);
-
-	    	var c = new Collection(name, data, keys);
+		    	var c = new Collection(name, data, keys);
+	    	}
         });
 	}
 	else console.log("no files in upload");
@@ -61,7 +77,19 @@ function loadBinaryFile(path, success) {
     reader.readAsBinaryString(files[0]);
 }
 
-function testWriteFile(workbook)
+function Write()
+{
+	var workbook = new XSSFWorkbook();
+	console.log(workbook);
+
+	for(var i in collections)
+	{
+		var c = collections[i];
+
+	}
+}
+
+function SaveWorkbook(workbook)
 {
 	/* bookType can be 'xlsx' or 'xlsm' or 'xlsb' */
 	var wopts = { bookType:'xlsx', bookSST:false, type:'binary' };
