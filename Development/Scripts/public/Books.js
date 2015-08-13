@@ -181,7 +181,7 @@ function Edition(_c, _e, _keys, _data, _emat)
 	this.v1 = vec3.create();
 	this.v1[0] = this.x;
 	this.v1[1] = this.y;
-	this.v1[2] = 40.0;
+	this.v1[2] = this.z; //40.0
 
 	//book mesh
 	this.easein = 0.95;
@@ -250,7 +250,7 @@ Edition.prototype.update = function()
 		this.v0[2] = 0.0;
 		this.v1[0] = this.x;
 		this.v1[1] = this.y;
-		this.v1[2] = 40.0;
+		this.v1[2] = this.z;
 }
 
 //remap

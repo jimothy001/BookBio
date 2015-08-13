@@ -1,18 +1,32 @@
 //UI
 
-var dli = document.getElementById("downloadLnk");
+var dli;
 
 function UI()
 {
-	this.parentstack=new CO.UIStack(document.body).setLabel("UI").setCollapsible(true);
+	this.parentstack=new CO.UIStack(document.body).setLabel("_").setCollapsible(true);
 	this.parentstack.setLocation(80+"%", 1+"%", "fixed").setSize(20+"%");
+	this.parentstack.collaped = false;
+	this.parentstack.setOnPressed(function(e)
+	{
+		if(this.collaped)
+		{
+			this.collaped = false;
+			this.setLabel("_");
+		} 
+		else
+		{
+			this.collaped = true;
+			this.setLabel("V");
+		}
+	});
 
-	this.searchfield = this.parentstack.addTextInput("type and press enter").setOnCommited(function(v)
+	this.searchfield = this.parentstack.addTextInput("type and press enter", "worldcat:").setOnCommited(function(v)
 	{
 		//sockety things
 		console.log("from text query field: " + v);
 	});
-	this.searchfield.setLabel("worldcat query:");
+	//this.searchfield.setLabel("worldcat query:");
 	this.uploadset = this.parentstack.addButton("upload set").setOnPressed(function(e){UploadSet()});
 	this.downloadcuratedset = this.parentstack.addButton("download set").setOnPressed(function(e){DownloadSet()});
 	this.downloadimage = this.parentstack.addButton("download image").setOnPressed(function(e){DownloadImage()});
