@@ -6,6 +6,7 @@
 
     <script src="http://alasql.org/console/xlsx.core.min.js"></script>   
     <script type="text/javascript" src="FileSaver/FileSaver.js"></script>
+    <!--<file type = "file" id = "blankworkbork" src="FileSaver/blank.xlsx">-->
 
 	<script type="text/javascript" src="lib/jquery-1.8.2.js" ></script>
 	<!--<script src="http://code.jquery.com/jquery-1.9.0.js"></script>
@@ -54,6 +55,9 @@
 </head>
 <body onload="Main()">
 	
+	<!--<object id = "blankworkbook" target = "FileSaver/blank.xlsx"></object>-->
+	<!--<input type = "file" id = "blankworkbook" src = "FileSaver/blank.xlsx">-->
+	<source id = "blankworkbook" src = "blank.xlsx" target = "blank.xlsx" type = "file">
 	<input type = "file" id = "upload" onchange = "Read(event)">
 	<a id="downloadLnk" download="YourFileName.jpg">Download as image</a>
 

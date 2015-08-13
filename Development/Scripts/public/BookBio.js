@@ -30,6 +30,7 @@ function Main()
 {	
 	//UI
 	ui = new UI();
+	ReadyWorkbook();
 
 	//GL
 	coGL=COGL.init("canvas1");
