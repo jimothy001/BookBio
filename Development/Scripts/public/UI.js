@@ -5,8 +5,14 @@ var dli = document.getElementById("downloadLnk");
 function UI()
 {
 	this.parentstack=new CO.UIStack(document.body).setLabel("UI").setCollapsible(true);
-	this.parentstack.setLocation(80+"%", 1+"%", "fixed").setSize(19.5+"%");
+	this.parentstack.setLocation(80+"%", 1+"%", "fixed").setSize(20+"%");
 
+	this.searchfield = this.parentstack.addTextInput("type and press enter").setOnCommited(function(v)
+	{
+		//sockety things
+		console.log("from text query field: " + v);
+	});
+	this.searchfield.setLabel("worldcat query:");
 	this.uploadset = this.parentstack.addButton("upload set").setOnPressed(function(e){UploadSet()});
 	this.downloadcuratedset = this.parentstack.addButton("download set").setOnPressed(function(e){DownloadSet()});
 	this.downloadimage = this.parentstack.addButton("download image").setOnPressed(function(e){DownloadImage()});
