@@ -1,6 +1,5 @@
 //GENERAL
 var ui;
-
 var collections = [];
 var select= null;
 var currentselect = null;
@@ -23,8 +22,6 @@ var geoquery = [];
 
 function Collection(_name, _data, _keys)
 {
-	console.log("new collection");
-
 	this.name = _name; 
 	this.size = _data.length;
 	this.keys = _keys;
@@ -47,7 +44,6 @@ function Collection(_name, _data, _keys)
 	if(geoquery.length > 0) QueryGeo(); //if there are queries for geographic information... query them.
 
 	collections.push(this); //add collection to collection of collections
-	console.log("collections length: "+collections.length);
 
 	ui.AddCollection(ci, this.name, this.keys);
 }
