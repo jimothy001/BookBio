@@ -3,17 +3,17 @@
   "description": "intro app",
   "version": "0.0.1",
   "private": true,
-  "dependencies": 
-  {
-    "connect":"*",
-    "method-override":"*",
-    "body-parser":"*",
-    "serve-static":"*",
-    "finalhandler":"*",
-    "errorhandler":"*",
-    "routes":"*",
-    "socket.io" :"*",
+  "dependencies": {
+    "connect": "*",
+    "method-override": "*",
+    "body-parser": "*",
+    "serve-static": "*",
+    "finalhandler": "*",
+    "errorhandler": "*",
+    "routes": "*",
+    "socket.io": "*",
     "mongodb": "*",
-    "node-geocoder": "*"
+    "node-geocoder": "*",
+    "xml2js": "^0.4.10"
   }
 }
