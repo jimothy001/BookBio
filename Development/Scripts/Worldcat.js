@@ -8,8 +8,21 @@ _this._findTag = function(data, tagNumber) {
 }
 
 _this._findCode = function(data, codeNumber) {
-  var code = data['subfield'][0]['$']['code'];
-  return code === codeNumber ? true : false;
+  var dataItems = data['subfield'];
+  var result;
+
+  for (var item in dataItems) {
+    var code = dataItems[item]['$'].code;
+    var value = dataItems[item]['_']
+
+    if (code === codeNumber) {
+      result = {
+        'code' : code,
+        'value': value
+      }
+    } 
+  }
+  return result;
 }
 
 module.exports =  {
@@ -19,15 +32,26 @@ module.exports =  {
 
       for (var record in records) {
         var recordData = records[record]['recordData'][0]['record'][0]['datafield'];
+
         for (var item in recordData) {
           var itemData = recordData[item];
-          // console.log(itemData);
+          var author, title, subTitle, notesOnTitle;
+
           if (_this._findTag(itemData, '100')) {
-            if (_this._findCode(itemData, 'a')) {
-              var author = itemData['subfield'][0]['_'];
-              console.log(author);
-            }
+            if (_this._findCode(itemData, 'a')) { author = _this._findCode(itemData, 'a').value; }
+            console.log('author: ', author);
           }
+
+          // Include if you want title,sub-Title, notes On Title
+          // if (_this._findTag(itemData, '245')) {
+          //   if (_this._findCode(itemData, 'a')) { title        = _this._findCode(itemData, 'a').value; }
+          //   if (_this._findCode(itemData, 'c')) { subTitle     = _this._findCode(itemData, 'c').value; }
+          //   if (_this._findCode(itemData, 'p')) { notesOnTitle = _this._findCode(itemData, 'p').value; }
+          //   console.log('title: ', title);
+          //   console.log('subTitle: ', subTitle);
+          //   console.log('notesOnTitle: ', notesOnTitle);
+          //   console.log('---');
+          // }
         }
       }
     });
