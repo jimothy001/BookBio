@@ -646,6 +646,7 @@ CO.inherits(CO.UIContainer, CO.UIControl);
 	return this;
 }*/
 
+
 CO.UIContainer.prototype.setCollapsed=function(_state) {
 
 	if (_state) { 

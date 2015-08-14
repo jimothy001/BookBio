@@ -21,7 +21,7 @@ function UI()
 
 UI.prototype.WorldCat = function()
 {
-	this.worldcat = this.parentstack.addStack("WorldCat Search").setCollapsible(true);
+	this.worldcat = this.parentstack.addStack("worldcat search").setCollapsible(true);
 	var _yearfrom = 0;
 	var _yearto = 2015;
 	var _audience = [{name:"any audience", data:""},{name:"juvenile", data:""},{name:"non-juvenile", data:""}];
@@ -48,7 +48,7 @@ UI.prototype.WorldCat = function()
 	var _years = {"yearfrom":_yearfrom, "yearto":_yearto};
 	var _dropdowns = {"audience":_audience, "content":_content, "format":_format, "language":_language};
 
-	this.worldcat.terms = {"fields":_fields, "yearfrom":_yearfrom, "yearto":_yearto, "audience":_audience, "content":_content, "format":_format, "language":_language};
+	this.worldcat.terms = {"fields":_fields, "yearfrom":_yearfrom, "yearto":_yearto, "audience":_audience, "content":_content, "format":_format, "language":_language};//***
 
 	this.worldcat.textfields = [];
 	this.worldcat.numfields = [];
@@ -127,6 +127,8 @@ UI.prototype.WorldCat = function()
 	{
 		this.parent.ResetWorldCat();
 	});
+
+	this.worldcat.setCollapsed(true);
 
 	return this.worldcat;
 }
