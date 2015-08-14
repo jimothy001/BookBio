@@ -4,38 +4,140 @@ var dli;
 
 function UI()
 {
-	this.parentstack=new CO.UIStack(document.body).setLabel("_").setCollapsible(true);
+	this.parentstack=new CO.UIStack(document.body).setLabel(".").setCollapsible(true);
 	this.parentstack.setLocation(80+"%", 1+"%", "fixed").setSize(20+"%");
 	this.parentstack.collaped = false;
-	this.parentstack.setOnPressed(function(e)
-	{
-		if(this.collaped)
-		{
-			this.collaped = false;
-			this.setLabel("_");
-		} 
-		else
-		{
-			this.collaped = true;
-			this.setLabel("V");
-		}
-	});
 
-	this.searchfield = this.parentstack.addTextInput("type and press enter", "worldcat:").setOnCommited(function(v)
-	{
-		//sockety things
-		console.log("from text query field: " + v);
-	});
 	//this.searchfield.setLabel("worldcat query:");
 	this.uploadset = this.parentstack.addButton("upload set").setOnPressed(function(e){UploadSet()});
 	this.downloadcuratedset = this.parentstack.addButton("download set").setOnPressed(function(e){DownloadSet()});
 	this.downloadimage = this.parentstack.addButton("download image").setOnPressed(function(e){DownloadImage()});
+	this.worldcat = this.WorldCat();
 
 	this.stacks = [];
 
 	return this;
 }
 
+UI.prototype.WorldCat = function()
+{
+	this.worldcat = this.parentstack.addStack("WorldCat Search").setCollapsible(true);
+	var _yearfrom = 0;
+	var _yearto = 2015;
+	var _audience = [{name:"any audience", data:""},{name:"juvenile", data:""},{name:"non-juvenile", data:""}];
+	var __audience = ["any audience","juvenile","non-juvenile"];
+	var _content = [{name:"any content"},{name:"fiction"},{name:"non-fiction"},{name:"biography"},{name:"thesis/dissertations"}];
+	var _format = 
+				[
+				{name:"all formats"},{name:"archival material"},{name:"article"},{name:"audiobook"},
+				{name:"book"},{name:"--- braile book"},{name:"--- large print"},{name:"journal, magazine"},
+				{name:"map"},{name:"music"},{name:"musical score"},{name:"newspaper"},{name:"sound recording"},
+				{name:"game"},{name:"visual material"}
+	 			]; //online media is excluded
+	var _language = 
+				[
+				{name:"all languages"},{name:"english"},{name:"arabic"},{name:"bulgarian"},{name:"chinese"},
+				{name:"croatian"},{name:"czech"},{name:"danish"},{name:"dutch"},{name:"french"},{name:"german"}, 
+				{name:"greek, modern [1453-]"},{name:"hebrew"},{name:"hindi"},{name:"indonesian"},{name:"italian"},
+				{name:"japanese"},{name:"korean"},{name:"latin"},{name:"norwegian"},{name:"persian"},{name:"polish"},
+				{name:"portuguese"},{name:"romanian"},{name:"russian"},{name:"spanish"},{name:"swedish"},{name:"thai"},
+				{name:"turkish"},{name:"ukrainian"},{name:"vietnamese"}
+				]; 
+
+	var _fields = {"keyword":"","title":"","author":"","subject":"","accession number":"","isbn":"","issn":"","journal source":""};		
+	var _years = {"yearfrom":_yearfrom, "yearto":_yearto};
+	var _dropdowns = {"audience":_audience, "content":_content, "format":_format, "language":_language};
+
+	this.worldcat.terms = {"fields":_fields, "yearfrom":_yearfrom, "yearto":_yearto, "audience":_audience, "content":_content, "format":_format, "language":_language};
+
+	this.worldcat.textfields = [];
+	this.worldcat.numfields = [];
+	this.worldcat.dropdowns = [];
+
+	var reset = this.worldcat.addButton("RESET VALUES");
+
+	for(var i in _fields)
+	{
+		var textfield = this.worldcat.addTextInput("...", i);
+		textfield.parent = this.worldcat;
+		textfield.setOnCommited(function(v)
+		{
+			if(v != "...") this.v = v;
+			else this.v = "";
+			
+			this.parent.terms.fields[i] = this.v;
+		});
+
+		this.worldcat.textfields.push(textfield);
+	}
+
+	for(var i in _years)
+	{
+		var numfield = this.worldcat.addTextInput(null, i);
+		numfield.parent = this.worldcat;
+		numfield.name = i;
+		numfield.bound = 0;
+		console.log(i);
+		if(i == "yearto") numfield.bound = 2015;
+		
+		numfield.makeNumeric(true, 0, 2015, numfield.bound);
+
+		numfield.setOnChanged(function(v)
+		{
+			if(v == null || v == 0 || isNaN(v) || v === undefined)
+			{
+				v = this.bound;
+			}
+
+			this.text = v;
+			this.textInput.value = v;
+			return v;
+		});
+
+		this.worldcat.numfields.push(numfield);
+	}
+
+	for(var i in _dropdowns)
+	{
+		var length = _dropdowns[i].length * 15;
+
+		var dropdown = this.worldcat.addCombo(_dropdowns[i], i, length + "px");
+		dropdown.parent = this.worldcat;
+		dropdown.setOnChanged(function(e)
+		{
+			this.parent.terms[i] = e["name"];
+			console.log(e["name"]);
+		});
+		dropdown.textInput.text = _dropdowns[i][0]["name"];
+
+		this.worldcat.dropdowns.push(dropdown);
+	}
+
+	var trigger = this.worldcat.addButton("SEARCH");
+	trigger.parent = this.worldcat;
+	trigger.setOnPressed(function(e)
+	{
+		var terms = this.parent.terms;
+		
+		console.log(terms);
+	});
+
+	reset.parent = this.worldcat;
+	reset.setOnPressed(function(e)
+	{
+		this.parent.ResetWorldCat();
+	});
+
+	return this.worldcat;
+}
+
+function UpdateField(field, value)
+{
+	field.text = value;
+	field.textInput.value = value;
+
+	return field;
+}
 
 UI.prototype.AddCollection = function(_ix, _name, _keys)
 {
@@ -67,8 +169,13 @@ UI.prototype.AddCollection = function(_ix, _name, _keys)
 		else c.Activate();
 	});
 
-
 	this.stacks.push(stack);
+}
+
+UI.prototype.ResetWorldCat = function()
+{
+	//for(var i in this.worldcat.terms)
+	//pick up here...
 }
 
 function UploadSet()
@@ -266,6 +373,28 @@ function SheetFrom2dArray(data, opts) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /*
+
+var yearfrom = this.worldcat.addTextInput(null, "year from:").makeNumeric(false, 0, 2020)
+yearfrom.parent = this.worldcat;
+yearfrom.setOnCommited(function(v)
+{
+	if(v != null) this.v = v;
+	else this.v = null;
+
+	this.parent.terms.yearfrom = this.v;
+});
+this.worldcat.textfields.push(yearfrom);
+
+var yearto = this.worldcat.addTextInput(null, "year from:").makeNumeric(false, 0, 2020)
+yearto.parent = this.worldcat;
+yearto.setOnCommited(function(v)
+{
+	if(v != null) this.v = v;
+	else this.v = null;
+
+	this.parent.terms.yearto = this.v;
+});
+this.worldcat.textfields.push(yearto);
 
 //from sheet from 2d Arrays
 else if(cell.v instanceof Date) {
