@@ -1,6 +1,3 @@
-//GENERAL
-var ui;
-
 //GL
 var coGL;
 var gl;
@@ -32,12 +29,14 @@ var query; //query geographic data
 function Main()
 {	
 	//UI
-	ui = UI();
+	ui = new UI();
 
 	//GL
 	coGL=COGL.init("canvas1");
 	gl=coGL.gl;
 	var geomat = new coGL.Material(coGL.shaders.default, {"uColor":[0.97,0.97,0.97,0.5]});
+	unmat = new coGL.Material(coGL.shaders.default, {"uColor":[0.9,0.9,0.9,0.05]});
+	selunmat = new coGL.Material(coGL.shaders.default, {"uColor":[0.5,0.5,0.5,0.5]});
 
 	//GEOGRAPHY //need to replace w/ single quad w/ texture
 	for(var i=0; i<161; i++)
@@ -49,7 +48,7 @@ function Main()
 	}
 
 	coGL.enableSelectionPass(modelsToSelect); //this appears to be the only pass that is necessary
-	//coGL.enableDepthPass(modelsToSelect);
+	//coGL.enableDepthPass(modelsToRender)//(modelsToSelect);
 	//coGL.enableUVPass(modelsToSelect); //is this perhaps necessary for texture rendering?
 	//coGL.enableWNormalPass(modelsToSelect);
 
@@ -61,7 +60,7 @@ function Main()
 	targetpoint[0] = 2.75;
 	targetpoint[1] = 0.0;
 	targetpoint[2] = 15.0;
-	coGL.camera.setViewPoint(viewpoint).setTargetPoint(targetpoint).setDistance(cameradistance).setFar(120.0).update(); //set GL start and viewpoint of camera. 
+	coGL.camera.setViewPoint(viewpoint).setTargetPoint(targetpoint).setDistance(cameradistance).setFar(200.0).update(); //set GL start and viewpoint of camera. 
 
 	var light=new coGL.Camera(); //GL light - try doing without this
 	light.easeIn=0.0;
@@ -79,7 +78,7 @@ function Main()
 		clearColorV(bgcol).
 		clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT).
 		camera().
-		light(light). //try doing without this
+		//light(light). //try doing without this
 		renderModels(modelsToRender).
 		execute(function() 
 		{
@@ -87,7 +86,7 @@ function Main()
 			{
 				for(var i in collections)
 				{
-					coGL.shaders.defaultline.u.uColor=[0,0,0,0.2];
+					coGL.shaders.defaultline.u.uColor=[0,0,0,0.1];
 					coGL.shaders.defaultline.use();
 					for(var j = 0; j < collections[i].editions.length; j++)
 					{
@@ -115,29 +114,38 @@ function Main()
 		//focus on item: set camera target and set UI values
 		if (select != null) //(e.which==1 && coGL.mouseOverObject) 
 		{
-			if(currentselect != null) currentselect.book.material = currentselect.emat; //change current selections material back to original
-			currentselect = select; 
-			currentselect.book.material = select.smat; //set selection with selection material
+			if(currentselect != null)
+			{	
+				if(currentselect.active) currentselect.currentmat = currentselect.emat; //change current selections material back to original
+				else currentselect.currentmat = unmat;
+
+				currentselect.book.material = currentselect.currentmat; 
+			}
+			
+			currentselect = select;
+			if(currentselect.active) currentselect.currentmat = currentselect.emat; //change current selections material back to original
+			else currentselect.currentmat = selunmat;
+
+			currentselect.book.material = currentselect.currentmat;
+
+			var c = currentselect.c;
+			var collection = collections[c];
+			var keys = collections[c].keys;
+			currentselect.book.material = collection.smat; //set selection with selection material
 
 			var t = [select.x, select.y, select.z];
 			coGL.camera.setTargetPoint(t); //set camera target
+			
+			var data = currentselect.data;
 
-			console.log(currentselect.smat);
-
-			//ui fields //MAKE FLEXIBLE
-			ui.citybutton.setLabel("place: " + select.place);
-			ui.shelfbutton.setLabel("shelf: " + select.shelf);
-			ui.matbutton.setLabel("material: " + select.bmat);
-			ui.formatbutton.setLabel("format: " + select.format);
-			ui.foliosbutton.setLabel("folios: " + select.folios);
-			ui.periodbutton.setLabel("period: " + select.period);
-			ui.yearbutton.setLabel("year: " + select.year);
-			ui.langbutton.setLabel("language: " + select.lang);
-			ui.vaccbutton.setLabel("verbal accretions: " + select.vacc);
-			ui.visbutton.setLabel("visuals: " + select.vis);
-			ui.illbutton.setLabel("illustrator: " + select.ill);
-			ui.refbutton.setLabel("reference: " + select.ref);
-			ui.notebutton.setLabel("note: " + select.note); //FIND A WAY FOR PEOPLE TO ADD NOTES
+			for(var k in keys)
+			{
+				var key = keys[k]+"";
+				var val = data[key];
+				var b = ui.stacks[c].buttons[key];
+				b.val = val;
+				b.setLabel(b.key + ":" + b.val);
+			}
 		}
 	});
 
@@ -164,6 +172,10 @@ function Main()
 			}
 		}
 	});
+
+
+	dli = document.getElementById("downloadLnk");
+	dli.addEventListener('click', download, false);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -221,7 +233,7 @@ function queueMsg(_msg, _data)
 	queue.push([_msg,_data]); // queue is now treated as a numerical array
 }
 
-//one message at a time
+//one message at a time - prevents server from being overwhelmed
 function tick()
 {
 	if(queue.length > 0)
@@ -291,6 +303,37 @@ setInterval(tick, 20);
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /*
+
+canvas1.addEventListener("mousedown", function(e) 
+{
+	//focus on item: set camera target and set UI values
+	if (select != null) //(e.which==1 && coGL.mouseOverObject) 
+	{
+		if(currentselect != null) currentselect.book.material = currentselect.emat; //change current selections material back to original
+		currentselect = select; 
+		currentselect.book.material = select.smat; //set selection with selection material
+
+		var t = [select.x, select.y, select.z];
+		coGL.camera.setTargetPoint(t); //set camera target
+
+		console.log(currentselect.smat);
+
+		//ui fields //MAKE FLEXIBLE
+		ui.citybutton.setLabel("place: " + select.place);
+		ui.shelfbutton.setLabel("shelf: " + select.shelf);
+		ui.matbutton.setLabel("material: " + select.bmat);
+		ui.formatbutton.setLabel("format: " + select.format);
+		ui.foliosbutton.setLabel("folios: " + select.folios);
+		ui.periodbutton.setLabel("period: " + select.period);
+		ui.yearbutton.setLabel("year: " + select.year);
+		ui.langbutton.setLabel("language: " + select.lang);
+		ui.vaccbutton.setLabel("verbal accretions: " + select.vacc);
+		ui.visbutton.setLabel("visuals: " + select.vis);
+		ui.illbutton.setLabel("illustrator: " + select.ill);
+		ui.refbutton.setLabel("reference: " + select.ref);
+		ui.notebutton.setLabel("note: " + select.note); //FIND A WAY FOR PEOPLE TO ADD NOTES
+	}
+});
 
 	coGL.addRenderingPass("final"). 
 	clearColorV(bgcol).

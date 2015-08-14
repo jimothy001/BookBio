@@ -157,25 +157,26 @@ io.sockets.on('connection', function (socket) {
 
 	socket.on('SearchQuery', function(query)
 	{
-		if (query.length != 0){
+		console.log(query);
+		// if (query.length != 0){
 
-			queryBase      = "http://www.worldcat.org/webservices/catalog/search/sru?query=srw.kw+any+%22";
-			requestDetails = "%22&version=1.1&operation=searchRetrieve&wskey=GwpUhR9ag9TLFAGLt6qTkPpIVCSetHrvnOvCY7FWE9pEbPztqmCjCFGWII8sbfpaGZ2CeLwGwXg7pHpC&recordSchema=info%3Asrw%2Fschema%2F1%2Fmarcxml&maximumRecords=10&startRecord=1&recordPacking=xml&servicelevel=default&sortKeys=relevance&resultSetTTL=300&recordXPath=";
-			requestString  = queryBase+query+requestDetails;
+		// 	queryBase      = "http://www.worldcat.org/webservices/catalog/search/sru?query=srw.kw+any+%22";
+		// 	requestDetails = "%22&version=1.1&operation=searchRetrieve&wskey=GwpUhR9ag9TLFAGLt6qTkPpIVCSetHrvnOvCY7FWE9pEbPztqmCjCFGWII8sbfpaGZ2CeLwGwXg7pHpC&recordSchema=info%3Asrw%2Fschema%2F1%2Fmarcxml&maximumRecords=10&startRecord=1&recordPacking=xml&servicelevel=default&sortKeys=relevance&resultSetTTL=300&recordXPath=";
+		// 	requestString  = queryBase+query+requestDetails;
 
-			http.get(requestString, function(response){
-				response.setEncoding('utf8');
-				var body = '';
-				response.on('data', function(chunk){
-					body += chunk;
-				});
-				response.on('end', function() {
-					Worldcat.parse(body);
-				});
-			}).on('error', function(error) {
-				console.log("error", error)
-			});
-		}
+		// 	http.get(requestString, function(response){
+		// 		response.setEncoding('utf8');
+		// 		var body = '';
+		// 		response.on('data', function(chunk){
+		// 			body += chunk;
+		// 		});
+		// 		response.on('end', function() {
+		// 			Worldcat.parse(body);
+		// 		});
+		// 	}).on('error', function(error) {
+		// 		console.log("error", error)
+		// 	});
+		// }
 	});
 
 });
