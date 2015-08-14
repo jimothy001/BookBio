@@ -65,22 +65,6 @@ UI.prototype.WorldCat = function()
 	{
 		var dt = this.defaultterms;
 		this.parent.ResetWorldCat(dt);
-
-		/*var wc = this.parent.worldcat;
-		var dt = defaultterms;
-		wc.terms = {};
-		wc.terms = dt;
-		console.log(dt);
-		
-		for(var i in wc.termsui)
-		{
-			for(var j in wc.termsui[i])
-			{
-				var termui = wc.termsui[i][j];
-				termui.text = termui.defaultterm;
-				termui.textInput.text = termui.defaultterm;
-			}
-		}*/
 	});
 
 	//text fields
@@ -176,7 +160,6 @@ UI.prototype.ResetWorldCat = function(_dt)
 	this.worldcat.terms = {};
 	this.worldcat.terms = _dt;
 	console.log(this.worldcat.terms);
-
 	
 	for(var i in this.worldcat.termsui)
 	{
