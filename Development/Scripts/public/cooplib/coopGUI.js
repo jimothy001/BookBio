@@ -1032,7 +1032,10 @@ CO.UITextInput=function(_parent) {
 
 	this.textInput.onchange=function() {
 		if (that.onChanged) 
+		{
 			that.onChanged(that.textInput.value);
+			that.text=that.textInput.value;
+		}
 		//if (that.onChanged && that.onChanged(that.textInput.value))  that.text=that.textInput.value;
 	}
 
@@ -1065,6 +1068,7 @@ CO.UITextInput=function(_parent) {
 		that.validate();		
 	};
 
+	//this.that = that; //jy
 
 	this.prependCssClass("UITextInput");
 }
@@ -1094,23 +1098,40 @@ CO.UITextInput.prototype.validate=function() {
 	}
 
 	if (this.onCommited)  {
+		//console.log("UITextInput.onCommited");
+		console.log("enteredvalue: "+enteredvalue);
 		var result=this.onCommited(enteredvalue);
+		//console.log(this.onCommited);
+		console.log("result: "+result);
 		if (result || result===undefined) {
+			console.log("1");
 			this.text=enteredvalue;
 			this.textInput.value=this.text;
 		}
 		else 
+			console.log("2");
 			this.textInput.value=this.text;
 	}
 	else {
+		console.log("! UITextInput.onCommited");
 		this.text=enteredvalue;
 	}
+
 	return this;
 }
 
 CO.UITextInput.prototype.setOnChanged=function(_callbak) {
 	this.onChanged=_callbak;
 	return this;
+}
+
+CO.UITextInput.prototype.update=function(_v) //jy
+{
+	console.log(_v);
+	this.text = _v;
+	this.textInput.value = _v;
+	//this.textInput.onchange();
+	//return this;
 }
 
 CO.UITextInput.prototype.setOnCommited=function(_callbak) {
@@ -1123,7 +1144,7 @@ CO.UITextInput.prototype.setOnType=function(_callbak) {
 	return this;
 }
 
-CO.UITextInput.prototype.makeNumeric=function(_isinteger, _min, _max) {
+/*CO.UITextInput.prototype.makeNumeric=function(_isinteger, _min, _max) {
 	this.isNumeric=true;
 	this.isInteger=_isinteger||false;
 	if (_min==null || _min==undefined) this.min=undefined;
@@ -1132,6 +1153,19 @@ CO.UITextInput.prototype.makeNumeric=function(_isinteger, _min, _max) {
 	else this.max=_max;
 
 	if (isNaN(this.text)) this.text=0;
+
+	return this;
+}*/
+
+CO.UITextInput.prototype.makeNumeric=function(_isinteger, _min, _max, _fallback) { //jy
+	this.isNumeric=true;
+	this.isInteger=_isinteger||false;
+	if (_min==null || _min==undefined) this.min=undefined;
+	else this.min=_min;
+	if (_max==null || _max==undefined) this.max=undefined;
+	else this.max=_max;
+
+	if (isNaN(this.text)) this.text=_fallback;
 
 	return this;
 }
@@ -1395,6 +1429,9 @@ CO.UICombo=function(_parent) {
 	}
 
 	this.textInput.onCommited=function(_enteredtext) {
+		
+		console.log("onCommited: "+_enteredtext);
+
 		var sitem=that.list.findByName(_enteredtext);
 		if (sitem) {
 			that.list.selectByElement(sitem.element);
