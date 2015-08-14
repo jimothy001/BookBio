@@ -24,8 +24,7 @@ UI.prototype.WorldCat = function()
 	this.worldcat = this.parentstack.addStack("worldcat search").setCollapsible(true);
 	var _yearfrom = 0;
 	var _yearto = 2015;
-	var _audience = [{name:"any audience", data:""},{name:"juvenile", data:""},{name:"non-juvenile", data:""}];
-	var __audience = ["any audience","juvenile","non-juvenile"];
+	var _audience = [{name:"any audience"},{name:"juvenile"},{name:"non-juvenile"}];
 	var _content = [{name:"any content"},{name:"fiction"},{name:"non-fiction"},{name:"biography"},{name:"thesis/dissertations"}];
 	var _format = 
 				[
@@ -48,7 +47,8 @@ UI.prototype.WorldCat = function()
 	var _years = {"yearfrom":_yearfrom, "yearto":_yearto};
 	var _dropdowns = {"audience":_audience, "content":_content, "format":_format, "language":_language};
 
-	this.worldcat.terms = {"fields":_fields, "yearfrom":_yearfrom, "yearto":_yearto, "audience":_audience, "content":_content, "format":_format, "language":_language};//***
+	this.worldcat.terms = {"fields":_fields, "yearfrom":_yearfrom, "yearto":_yearto, "audience":_audience[0].name, "content":_content[0].name, "format":_format[0].name, "language":_language[0].name};//***
+	var defaultterms = {"fields":_fields, "yearfrom":_yearfrom, "yearto":_yearto, "audience":_audience[0].name, "content":_content[0].name, "format":_format[0].name, "language":_language[0].name};
 
 	this.worldcat.textfields = [];
 	this.worldcat.numfields = [];
@@ -60,12 +60,14 @@ UI.prototype.WorldCat = function()
 	{
 		var textfield = this.worldcat.addTextInput("...", i);
 		textfield.parent = this.worldcat;
+		textfield.name = i;
+		textfield.defaultterm = "...";
 		textfield.setOnCommited(function(v)
 		{
-			if(v != "...") this.v = v;
+			if(v != "..." && v != undefined) this.v = v;
 			else this.v = "";
 			
-			this.parent.terms.fields[i] = this.v;
+			this.parent.terms.fields[this.name] = this.v;
 		});
 
 		this.worldcat.textfields.push(textfield);
@@ -76,21 +78,22 @@ UI.prototype.WorldCat = function()
 		var numfield = this.worldcat.addTextInput(null, i);
 		numfield.parent = this.worldcat;
 		numfield.name = i;
-		numfield.bound = 0;
+		numfield.defaultterm = 0;
 		console.log(i);
-		if(i == "yearto") numfield.bound = 2015;
-		
+		if(i == "yearto") numfield.defaultterm = 2015;
 		numfield.makeNumeric(true, 0, 2015, numfield.bound);
 
 		numfield.setOnChanged(function(v)
 		{
 			if(v == null || v == 0 || isNaN(v) || v === undefined)
 			{
-				v = this.bound;
+				v = this.defaultterm;
 			}
 
 			this.text = v;
 			this.textInput.value = v;
+			this.parent.terms[this.name] = v;
+
 			return v;
 		});
 
@@ -103,22 +106,30 @@ UI.prototype.WorldCat = function()
 
 		var dropdown = this.worldcat.addCombo(_dropdowns[i], i, length + "px");
 		dropdown.parent = this.worldcat;
+		dropdown.name = i;
+		dropdown.defaultterm = _dropdowns[i][0].name;
 		dropdown.setOnChanged(function(e)
 		{
-			this.parent.terms[i] = e["name"];
+			this.parent.terms[this.name] = e.name;
+			//this.parent.terms[i] = e["name"];
 			console.log(e["name"]);
 		});
-		dropdown.textInput.text = _dropdowns[i][0]["name"];
+		dropdown.textInput.text = dropdown.defaultterm;
 
 		this.worldcat.dropdowns.push(dropdown);
 	}
 
 	var trigger = this.worldcat.addButton("SEARCH");
 	trigger.parent = this.worldcat;
+	trigger.defaultterms = defaultterms;
 	trigger.setOnPressed(function(e)
 	{
 		var terms = this.parent.terms;
-		
+		var dterms = this.defaultterms;
+
+		//ALEX, DO SOCKETY THINGS HERE!!!!!!!!!
+
+		console.log(dterms);
 		console.log(terms);
 	});
 
@@ -174,9 +185,25 @@ UI.prototype.AddCollection = function(_ix, _name, _keys)
 	this.stacks.push(stack);
 }
 
-UI.prototype.ResetWorldCat = function()
+UI.prototype.ResetWorldCat = function(_defaultterms)
 {
-	//for(var i in this.worldcat.terms)
+	this.worldcat.terms = _defaultterms;
+	console.log(this.worldcat.terms);
+
+	for(var i in this.worldcat.textfields)
+	{
+
+	}
+
+	for(var i in this.worldcat.numfields)
+	{
+
+	}
+
+	for(var i in this.worldcat.dropdowns)
+	{
+		
+	}
 	//pick up here...
 }
 
