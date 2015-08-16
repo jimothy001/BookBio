@@ -169,23 +169,8 @@ io.sockets.on('connection', function (socket) {
 	socket.on('SearchQuery', function(query)
 	{
 		if (query.length != 0){
-			// console.log(query);
-			var tempQuery = { 
-				fields: { 
-					keyword: 'book',
-				    title: 'inferno',
-				    author: 'dante',
-				    subject: '',
-				    isbn: '',
-				    issn: '' },
-				yearfrom: 0,
-				yearto: 2015,
-				audience: 'any audience',
-				content: 'any content',
-				format: 'all formats',
-				language: 'english'
 			}
-			Worldcat.search(tempQuery);
+			Worldcat.search(query);
 		} else {
 			console.log('empty search dude');
 		}
