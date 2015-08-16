@@ -1,4 +1,4 @@
-//GENERAL
+/*//GENERAL
 var ui;
 var collections = [];
 var select= null;
@@ -6,7 +6,7 @@ var currentselect = null;
 var unmat;
 var selunmat;
 var geoinfo = []; //This should be checked with each new set of bibliographic results for each new collection for to prevent redundant queries to 3rd parties.
-var geoquery = [];
+var geoquery = [];*/
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

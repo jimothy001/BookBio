@@ -1,4 +1,4 @@
-//GL
+/*//GL
 var coGL;
 var gl;
 var modelsToRender=[]; //models to render is a collection of things with a render funciton they could even represent arbitrary conditional group selectors
@@ -13,7 +13,7 @@ var socket = io.connect(); //socket.io initialization and creation of the socket
 	//this technique can be used for less critical events and they could bebatched and uploaded as a package to 
 	//avoid overwhelming the server
 var queue=[];//socket queue
-var query; //query geographic data
+var query; //query geographic data*/
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //MAIN //RUNS ONCE ON PAGE LOAD
