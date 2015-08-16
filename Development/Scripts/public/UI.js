@@ -1,6 +1,6 @@
 //UI
 
-var dli;
+//var dli;
 
 function UI()
 {
@@ -24,8 +24,7 @@ UI.prototype.WorldCat = function()
 	this.worldcat = this.parentstack.addStack("worldcat search").setCollapsible(true);
 	var _yearfrom = 0;
 	var _yearto = 2015;
-	var _audience = [{name:"any audience", data:""},{name:"juvenile", data:""},{name:"non-juvenile", data:""}];
-	var __audience = ["any audience","juvenile","non-juvenile"];
+	var _audience = [{name:"any audience"},{name:"juvenile"},{name:"non-juvenile"}];
 	var _content = [{name:"any content"},{name:"fiction"},{name:"non-fiction"},{name:"biography"},{name:"thesis/dissertations"}];
 	var _format = 
 				[
@@ -44,59 +43,78 @@ UI.prototype.WorldCat = function()
 				{name:"turkish"},{name:"ukrainian"},{name:"vietnamese"}
 				]; 
 
-	var _fields = {"keyword":"","title":"","author":"","subject":"","accession number":"","isbn":"","issn":"","journal source":""};		
+	var _fields = {"keyword":"","title":"","author":"","subject":"","accession number":"","isbn":"","issn":"","journal source":""};
+	var __fields = {"keyword":"","title":"","author":"","subject":"","accession number":"","isbn":"","issn":"","journal source":""};	
 	var _years = {"yearfrom":_yearfrom, "yearto":_yearto};
 	var _dropdowns = {"audience":_audience, "content":_content, "format":_format, "language":_language};
 
-	this.worldcat.terms = {"fields":_fields, "yearfrom":_yearfrom, "yearto":_yearto, "audience":_audience, "content":_content, "format":_format, "language":_language};//***
+	this.worldcat.terms = {"fields":_fields, "yearfrom":_yearfrom, "yearto":_yearto, "audience":_audience[0].name, "content":_content[0].name, "format":_format[0].name, "language":_language[0].name};//***
+	var defaultterms = {"fields":__fields, "yearfrom":_yearfrom, "yearto":_yearto, "audience":_audience[0].name, "content":_content[0].name, "format":_format[0].name, "language":_language[0].name};
 
+	//worldcat ui structure
+	this.worldcat.termsui = [];
 	this.worldcat.textfields = [];
 	this.worldcat.numfields = [];
 	this.worldcat.dropdowns = [];
-
+	
+	//reset button
 	var reset = this.worldcat.addButton("RESET VALUES");
+	reset.parent = this;
+	reset.defaultterms = defaultterms;
+	reset.setOnPressed(function(e)
+	{
+		var dt = this.defaultterms;
+		this.parent.ResetWorldCat(dt);
+	});
 
+	//text fields
 	for(var i in _fields)
 	{
 		var textfield = this.worldcat.addTextInput("...", i);
 		textfield.parent = this.worldcat;
+		textfield.name = i;
+		textfield.defaultterm = "...";
 		textfield.setOnCommited(function(v)
 		{
-			if(v != "...") this.v = v;
+			if(v != "..." && v != undefined) this.v = v;
 			else this.v = "";
 			
-			this.parent.terms.fields[i] = this.v;
+			this.parent.terms.fields[this.name] = this.v;
 		});
 
 		this.worldcat.textfields.push(textfield);
 	}
+	this.worldcat.termsui.push(this.worldcat.textfields);
 
+	//time domain
 	for(var i in _years)
 	{
 		var numfield = this.worldcat.addTextInput(null, i);
 		numfield.parent = this.worldcat;
 		numfield.name = i;
-		numfield.bound = 0;
-		console.log(i);
-		if(i == "yearto") numfield.bound = 2015;
-		
+		numfield.defaultterm = 0;
+		if(i == "yearto") numfield.defaultterm = 2015;
 		numfield.makeNumeric(true, 0, 2015, numfield.bound);
 
 		numfield.setOnChanged(function(v)
 		{
-			if(v == null || v == 0 || isNaN(v) || v === undefined)
+			if(v == null || isNaN(v) || v === undefined)
 			{
-				v = this.bound;
+				v = this.defaultterm;
 			}
 
 			this.text = v;
 			this.textInput.value = v;
+			this.parent.terms[this.name] = v;
+
 			return v;
 		});
 
 		this.worldcat.numfields.push(numfield);
 	}
+	this.worldcat.termsui.push(this.worldcat.numfields);
 
+	//dropdown criteria
 	for(var i in _dropdowns)
 	{
 		var length = _dropdowns[i].length * 15;
@@ -111,42 +129,50 @@ UI.prototype.WorldCat = function()
 		if (dropdownName === 'all formats') { dropdown.parent.terms[i] = 'all formats'; }
 		if (dropdownName === 'all languages') { dropdown.parent.terms[i] = 'all languages'; }
 
+		dropdown.name = i;
+		dropdown.defaultterm = _dropdowns[i][0].name;
 		dropdown.setOnChanged(function(e)
 		{
-			this.parent.terms[i] = e["name"];
+			this.parent.terms[this.name] = e.name;
 			console.log(e["name"]);
 		});
-		dropdown.textInput.text = _dropdowns[i][0]["name"];
+		dropdown.textInput.text = dropdown.defaultterm;
 
 		this.worldcat.dropdowns.push(dropdown);
 	}
+	this.worldcat.termsui.push(this.worldcat.dropdowns);
 
+	//searchbutton
 	var trigger = this.worldcat.addButton("SEARCH");
 	trigger.parent = this.worldcat;
 	trigger.setOnPressed(function(e)
 	{
 		var terms = this.parent.terms;
-
 		queueMsg('SearchQuery', terms);
 	});
 
-	reset.parent = this.worldcat;
-	reset.setOnPressed(function(e)
-	{
-		this.parent.ResetWorldCat();
-	});
-
+	//less is more
 	this.worldcat.setCollapsed(true);
 
+	//meow
 	return this.worldcat;
 }
 
-function UpdateField(field, value)
+UI.prototype.ResetWorldCat = function(_dt)
 {
-	field.text = value;
-	field.textInput.value = value;
-
-	return field;
+	this.worldcat.terms = {};
+	this.worldcat.terms = _dt;
+	console.log(this.worldcat.terms);
+	
+	for(var i in this.worldcat.termsui)
+	{
+		for(var j in this.worldcat.termsui[i])
+		{
+			var termui = this.worldcat.termsui[i][j];
+			termui.text = termui.defaultterm;
+			termui.textInput.text = termui.defaultterm;
+		}
+	}
 }
 
 UI.prototype.AddCollection = function(_ix, _name, _keys)
@@ -180,12 +206,6 @@ UI.prototype.AddCollection = function(_ix, _name, _keys)
 	});
 
 	this.stacks.push(stack);
-}
-
-UI.prototype.ResetWorldCat = function()
-{
-	//for(var i in this.worldcat.terms)
-	//pick up here...
 }
 
 function UploadSet()
