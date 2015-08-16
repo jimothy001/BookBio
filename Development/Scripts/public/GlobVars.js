@@ -6,6 +6,12 @@ var modelsToSelect=[];  //collection of models that are selectable
 var cameradistance = 50.0;
 var bgcol = [0.9,0.9,0.9,1];
 
+//SPACE
+var map;
+var mapmodels = [];
+var timemark;
+var timemodels = [];
+
 //SOCKET
 var id; //user's id for receiving data from server
 var socket = io.connect(); //socket.io initialization and creation of the socket object at beginning of script

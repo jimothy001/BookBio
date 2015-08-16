@@ -34,18 +34,14 @@ function Main()
 	//GL
 	coGL=COGL.init("canvas1");
 	gl=coGL.gl;
-	var geomat = new coGL.Material(coGL.shaders.default, {"uColor":[0.97,0.97,0.97,0.5]});
+	//var geomat = new coGL.Material(coGL.shaders.default, {"uColor":[0.97,0.97,0.97,0.5]});
 	unmat = new coGL.Material(coGL.shaders.default, {"uColor":[0.9,0.9,0.9,0.05]});
 	selunmat = new coGL.Material(coGL.shaders.default, {"uColor":[0.5,0.5,0.5,0.5]});
 
-	//GEOGRAPHY //need to replace w/ single quad w/ texture
-	for(var i=0; i<161; i++)
-	{
-		var _geomesh = coGL.loadMeshFromJSON("models/geo" + i + ".json");
-		var geomesh = new coGL.Model(_geomesh, 0.0, 0.0, 0.0);
-		geomesh.material=geomat;
-		modelsToRender.push(geomesh);
-	}
+	map = Map();
+	console.log(map.meshes);
+	timemark = TimeMark();
+	console.log(timemark.meshes);
 
 	coGL.enableSelectionPass(modelsToSelect); //this appears to be the only pass that is necessary
 	//coGL.enableDepthPass(modelsToRender)//(modelsToSelect);
@@ -79,7 +75,7 @@ function Main()
 		clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT).
 		camera().
 		//light(light). //try doing without this
-		renderModels(modelsToRender).
+		//renderModels(modelsToRender). //can use filter
 		execute(function() 
 		{
 			if(collections.length > 0)
@@ -102,6 +98,9 @@ function Main()
 				coGL.drawLines.commit();
 			}
 		}).
+		renderModels(mapmodels).
+		renderModels(modelsToRender).
+		renderModels(timemodels).
 		activate();
 		
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
