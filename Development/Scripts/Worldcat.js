@@ -3,29 +3,11 @@ var parseString = require('xml2js').parseString;
 var _this       = this;
 var results     = [];
 
-_this._findTag = function(data, tagNumber) {
-  var tagData = data['$']['tag']; 
-  return tagData === tagNumber ? true : false;
-}
 
-_this._findCode = function(data, codeNumber) {
-  var dataItems = data['subfield'];
-  var result;
 
-  for (var item in dataItems) {
-    var code = dataItems[item]['$'].code;
-    var value = dataItems[item]['_']
-
-    if (code === codeNumber) {
-      result = {
-        'code' : code,
-        'value': value
-      }
-    } 
-  }
-  return result;
-}
-
+/*///////////////////////////
+// Create WorldCat request // 
+///////////////////////////*/
 _this._getWCIndex = function(search) {
   var base = 'srw.'
 
@@ -75,59 +57,113 @@ _this._constructRequest = function(data) {
   }
 
   query = queryBase + searchString + version + worldCatApiKey + pagingOptions;
+  return query;
 
-  // http.get(requestString, function(response){
-  //  response.setEncoding('utf8');
-  //  var body = '';
-
-  //  response.on('data', function(chunk){
-  //    body += chunk;
-  //  });
-
-  //  response.on('end', function() {
-  //    Worldcat.parse(body);
-  //  });
-
-  // }).on('error', function(error) {
-  //  console.log("error", error)
-  // });
 }
 
-_this._parse = function(query) {
-  parseString(data, function (err, result) {
-    var records = result['searchRetrieveResponse']['records'][0]['record'];
+_this._makeRequest = function(query) {
+  console.log(query);
+  http.get(query, function(response){
+    response.setEncoding('utf8');
+    var body = '';
 
-    for (var record in records) {
-      var recordData = records[record]['recordData'][0]['record'][0]['datafield'];
+  response.on('data', function(chunk){
+    body += chunk;
+  });
 
-      for (var item in recordData) {
-        var itemData = recordData[item];
-        var author, title, subTitle, notesOnTitle;
+  response.on('end', function() {
+    _this._parse(body);
+  });
 
-        if (_this._findTag(itemData, '100')) {
-          if (_this._findCode(itemData, 'a')) { author = _this._findCode(itemData, 'a').value; }
-          console.log('author: ', author);
-        }
-
-        // Include if you want title,sub-Title, notes On Title
-        // if (_this._findTag(itemData, '245')) {
-        //   if (_this._findCode(itemData, 'a')) { title        = _this._findCode(itemData, 'a').value; }
-        //   if (_this._findCode(itemData, 'c')) { subTitle     = _this._findCode(itemData, 'c').value; }
-        //   if (_this._findCode(itemData, 'p')) { notesOnTitle = _this._findCode(itemData, 'p').value; }
-        //   console.log('title: ', title);
-        //   console.log('subTitle: ', subTitle);
-        //   console.log('notesOnTitle: ', notesOnTitle);
-        //   console.log('---');
-        // }
-      }
-    }
+  }).on('error', function(error) {
+    console.log("error", error)
   });
 }
 
+
+/*///////////////////////////////
+// Parse the worldcat response // 
+///////////////////////////////*/
+_this._findTag = function(data, tagNumber) {
+  var tagData = data['$']['tag']; 
+  return tagData === tagNumber ? true : false;
+}
+
+_this._findCode = function(data, codeNumber) {
+  var dataItems = data['subfield'];
+  var result;
+
+  for (var item in dataItems) {
+    var code = dataItems[item]['$'].code;
+    var value = dataItems[item]['_']
+
+    if (code === codeNumber) {
+      result = {
+        'code' : code,
+        'value': value
+      }
+    } 
+  }
+  return result;
+}
+
+_this._parse = function(data) {
+  parseString(data, function (err, result) {
+    var records = result['searchRetrieveResponse']['records'][0]['record'];
+    var outputs = [];
+
+    for (var record in records) {
+      var recordData = records[record]['recordData'][0]['record'][0]['datafield'];
+      var output = {};
+
+      for (var item in recordData) {
+        var itemData = recordData[item];
+        var author, title, subTitle, publicationCity, publicationDate, edition, publisher;
+
+        // AUTHOR
+        if (_this._findTag(itemData, '100')) {
+          if (_this._findCode(itemData, 'a')) { author = _this._findCode(itemData, 'a').value; }
+          output['author'] = author;
+        }
+
+        // TITLE & SUBTITLE
+        if (_this._findTag(itemData, '245')) {
+          if (_this._findCode(itemData, 'a')) { title    = _this._findCode(itemData, 'a').value; }
+          if (_this._findCode(itemData, 'c')) { subTitle = _this._findCode(itemData, 'c').value; }
+          output['title'] = title;
+          output['subTitle'] = subTitle;
+        }
+
+        // PUBLICATION CITY, DATE, & PUBLISHER
+        if (_this._findTag(itemData, '260')) {
+          if (_this._findCode(itemData, 'a')) { publicationCity = _this._findCode(itemData, 'a').value; }
+          output['publicationCity'] = publicationCity;
+          if (_this._findCode(itemData, 'b')) { publisher = _this._findCode(itemData, 'b').value; }
+          output['publisher'] = publisher;
+          if (_this._findCode(itemData, 'c')) { publicationDate = _this._findCode(itemData, 'c').value; }
+          output['publicationDate'] = publicationDate;
+        }
+
+        // Edition
+        if (_this._findTag(itemData, '250')) {
+          if (_this._findCode(itemData, 'a')) { edition = _this._findCode(itemData, 'a').value; }
+          output['edition'] = edition;
+        }
+
+      }
+      outputs.push(output);
+    }
+    console.log(outputs);
+  });
+}
+
+/*////////////////////////
+// Public Search method // 
+////////////////////////*/
 module.exports =  {
   search: function(query) {
-   var data = _this._constructRequest(query);
-   // console.log(data);
-   // return _this._parse(data);
+    var data = _this._constructRequest(query);
+    _this._makeRequest(data);
+    // return _this._parse(response);
   }
 }
