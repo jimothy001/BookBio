@@ -1,6 +1,6 @@
 //UI
 
-var dli;
+//var dli;
 
 function UI()
 {
