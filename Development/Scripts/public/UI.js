@@ -103,6 +103,14 @@ UI.prototype.WorldCat = function()
 
 		var dropdown = this.worldcat.addCombo(_dropdowns[i], i, length + "px");
 		dropdown.parent = this.worldcat;
+
+		// Default values
+		var dropdownName = _dropdowns[i][0]['name'];
+		if (dropdownName === 'any audience') { dropdown.parent.terms[i] = 'any audience'; }
+		if (dropdownName === 'any content') { dropdown.parent.terms[i] = 'any content'; }
+		if (dropdownName === 'all formats') { dropdown.parent.terms[i] = 'all formats'; }
+		if (dropdownName === 'all languages') { dropdown.parent.terms[i] = 'all languages'; }
+
 		dropdown.setOnChanged(function(e)
 		{
 			this.parent.terms[i] = e["name"];
@@ -120,7 +128,6 @@ UI.prototype.WorldCat = function()
 		var terms = this.parent.terms;
 
 		queueMsg('SearchQuery', terms);
-		console.log(terms);
 	});
 
 	reset.parent = this.worldcat;
