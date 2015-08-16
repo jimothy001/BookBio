@@ -27,65 +27,54 @@ _this._findCode = function(data, codeNumber) {
 }
 
 _this._getWCIndex = function(search) {
+  var base = 'srw.'
+
   switch (search) {
   case 'keyword':
-    return 'kw';
+    return base + 'kw';
   case 'title':
-    return 'ti';
+    return base + 'ti';
   case 'author':
-    return 'au';
+    return base + 'au';
   case 'subject':
-    return 'su';
+    return base + 'su';
   case 'isbn':
-    return 'bn';
+    return base + 'bn';
   case 'issn':
-    return 'n2';
+    return base + 'n2';
   default:
-    return 'kw';
+    return base + 'kw';
   }
 }
 
 _this._constructRequest = function(data) {
-  // queryBase = "http://www.worldcat.org/webservices/catalog/search/sru?query=";
-  var fields       = data['fields'];
-  var language     = data['language'];
-  var searchString = '';
-  var operator     = '%3A';   // default for 'constains' search, %3D for 'exact' search.
+  var fields         = data['fields'];
+  var language       = data['language'];
+  var operator       = '+any+';
+  var conjugator     = '+and+';
+  var queryBase      = 'http://www.worldcat.org/webservices/catalog/search/sru?query=';
+  var searchString   = '';
+  var query          = '';
+  var version        = '&version=1.1';
+  var worldCatApiKey = '&operation=searchRetrieve&wskey=GwpUhR9ag9TLFAGLt6qTkPpIVCSetHrvnOvCY7FWE9pEbPztqmCjCFGWII8sbfpaGZ2CeLwGwXg7pHpC';
+  var pagingOptions  = '&recordSchema=&maximumRecords=10&startRecord=1&recordPacking=xml&servicelevel=default&sortKeys=relevance&resultSetTTL=300&recordXPath=';
 
   for (var key in fields) {
     if (fields[key] !== '') {
       var wcIndex = _this._getWCIndex(key); 
-      searchString += wcIndex + operator + fields[key] + ' ';
+      var searchTerm = encodeURIComponent(' ' + fields[key] + ' ' );
+      searchString += wcIndex + operator + searchTerm + conjugator;
     }
   }
 
-  if (language !== 'all_languages') {
-    searchString += 'ln' + operator + language + ' ';
+  if (language !== 'all languages') {
+    var languageTerm = encodeURIComponent(' ' + language + ' ');
+    searchString += 'srw.la' + operator + languageTerm;
+  } else {
+    searchString = searchString.substring(0, searchString.length - conjugator.length); 
   }
 
-  if (searchString !== '') {
-    //replace space with +
-    searchString = searchString.replace(/ /g, '+');
-
-    //remove last "+"
-    searchString = searchString.substring(0,searchString.length-1); 
-
-    //escape quotes
-    searchString = searchString.replace(/\"/g, '&quot;');
-    searchString = searchString.replace(/\'/g, "\\'");
-    searchString = 'http://www.worldcat.org/webservices/catalog/search/sru?query=' + searchString + '\\';
-    console.log('ya', searchString);
-
-  }
-        // window.open(\'http://www.worldcat.org/search?q=' + searchString + '\');
-
-  // encodeURIComponent(title);
-
-
-  // if (search['fields']['keyword'])
-
-  // requestDetails = "%22&version=1.1&operation=searchRetrieve&wskey=GwpUhR9ag9TLFAGLt6qTkPpIVCSetHrvnOvCY7FWE9pEbPztqmCjCFGWII8sbfpaGZ2CeLwGwXg7pHpC&recordSchema=info%3Asrw%2Fschema%2F1%2Fmarcxml&maximumRecords=10&startRecord=1&recordPacking=xml&servicelevel=default&sortKeys=relevance&resultSetTTL=300&recordXPath=";
-  // requestString  = queryBase+query+requestDetails;
+  query = queryBase + searchString + version + worldCatApiKey + pagingOptions;
 
   // http.get(requestString, function(response){
   //  response.setEncoding('utf8');

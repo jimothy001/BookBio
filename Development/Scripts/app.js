@@ -169,7 +169,6 @@ io.sockets.on('connection', function (socket) {
 	socket.on('SearchQuery', function(query)
 	{
 		if (query.length != 0){
-			}
 			Worldcat.search(query);
 		} else {
 			console.log('empty search dude');
