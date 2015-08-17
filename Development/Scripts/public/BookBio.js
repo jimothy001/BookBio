@@ -34,23 +34,23 @@ function Main()
 	//GL
 	coGL=COGL.init("canvas1");
 	gl=coGL.gl;
-	var geomat = new coGL.Material(coGL.shaders.default, {"uColor":[0.97,0.97,0.97,0.5]});
+	//var geomat = new coGL.Material(coGL.shaders.default, {"uColor":[0.97,0.97,0.97,0.5]});
 	unmat = new coGL.Material(coGL.shaders.default, {"uColor":[0.9,0.9,0.9,0.05]});
 	selunmat = new coGL.Material(coGL.shaders.default, {"uColor":[0.5,0.5,0.5,0.5]});
 
-	//GEOGRAPHY //need to replace w/ single quad w/ texture
-	for(var i=0; i<161; i++)
-	{
-		var _geomesh = coGL.loadMeshFromJSON("models/geo" + i + ".json");
-		var geomesh = new coGL.Model(_geomesh, 0.0, 0.0, 0.0);
-		geomesh.material=geomat;
-		modelsToRender.push(geomesh);
-	}
+	map = new Map();
+	timemark = new TimeMark();
 
-	coGL.enableSelectionPass(modelsToSelect); //this appears to be the only pass that is necessary
-	//coGL.enableDepthPass(modelsToRender)//(modelsToSelect);
-	//coGL.enableUVPass(modelsToSelect); //is this perhaps necessary for texture rendering?
+	console.log(tagmodels);
+
+	coGL.enableSelectionPass(modelsToSelect);
+	//coGL.enableDepthPass(modelsToSelect);
+	//coGL.enableUVPass(modelsToSelect);
 	//coGL.enableWNormalPass(modelsToSelect);
+
+	//var texture3d=new coGL.Texture3d(64,32,32,[255,0,0,255]);
+
+	coGL.texturePass("back", "blury");
 
 	var viewpoint = vec3.create(); //starting position of GL camera
 	viewpoint[0] = 20.0;
@@ -79,7 +79,7 @@ function Main()
 		clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT).
 		camera().
 		//light(light). //try doing without this
-		renderModels(modelsToRender).
+		//renderModels(modelsToRender). //can use filter
 		execute(function() 
 		{
 			if(collections.length > 0)
@@ -101,7 +101,26 @@ function Main()
 				}
 				coGL.drawLines.commit();
 			}
+
+			for(var i in tagmodels)
+			{
+				tagmodels[i].tex.graphics.fillStyle="#ffffff";
+				tagmodels[i].tex.graphics.fillRect(0,0,tagmodels[i].tex.width,tagmodels[i].tex.height);
+
+				/*tagmodels[i].tex.graphics.fillStyle="#0000ff";
+				tagmodels[i].tex.graphics.fillRect(0,0,timemodels[0].tex.width,timemodels[0].tex.height);*/
+
+				tagmodels[i].tex.graphics.fillStyle="#000000";
+				tagmodels[i].tex.graphics.font="40px Courier";
+				tagmodels[i].tex.graphics.fillText(timemark.marks[i].date + "",tagmodels[i].tex.width*0.1, tagmodels[i].tex.width*0.4);
+
+				tagmodels[i].tex.update();
+			}
 		}).
+		renderModels(modelsToRender).
+		renderModels(mapmodels).
+		renderModels(tagmodels).
+		renderModels(timemodels).
 		activate();
 		
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -217,7 +236,7 @@ socket.on("_QueryGeo", function(_data)
 });
 
 socket.on("SearchQueryResult", function(_data) {
-	queryResponse(_data);
+	var c = new Collection(name, data);
 });
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
