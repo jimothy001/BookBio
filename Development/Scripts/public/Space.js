@@ -1,4 +1,4 @@
-	
+
 function TimeMark() //TIME DEMARCATION
 {
 	this.bounds = [1300, 2015];
@@ -10,7 +10,9 @@ function TimeMark() //TIME DEMARCATION
 	for(var i = 0; i<5; i++)
 	{
 		var mark = new Mark(this.mat);
+		mark.tag = mark.Tag();
 		mark.Set(10.0 * i);
+
 
 		this.marks.push(mark);
 
@@ -23,10 +25,10 @@ function TimeMark() //TIME DEMARCATION
 	return this;
 }
 
-TimeMark.prototype.CheckBounds = (_from, _to)
+/*TimeMark.prototype.CheckBounds = (_from, _to)
 {
 	
-}
+}*/
 
 TimeMark.prototype.MapMarks = function(_from, _to)
 {	
@@ -52,7 +54,7 @@ function Mark(_mat)
 	mark.material = _mat;
 	this.model = mark;
 
-	this.tag = this.Tag();
+	//this.tag = this.Tag();
 
 	return this;
 }
