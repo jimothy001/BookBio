@@ -40,8 +40,6 @@ function Main()
 	map = new Map();
 	timemark = new TimeMark();
 
-	console.log(tagmodels);
-
 	coGL.enableSelectionPass(modelsToSelect);
 	//coGL.enableDepthPass(modelsToSelect);
 	//coGL.enableUVPass(modelsToSelect);
