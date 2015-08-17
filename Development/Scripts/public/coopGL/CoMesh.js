@@ -176,6 +176,7 @@ COGL.MeshModule=function(_cogl) {
     
     _cogl.stockMeshes.screenQuad=new _cogl.Mesh(TempVBOdata, TempIBOdata);
 
+
     var m = 0.4;
     TempVBOdata=new Float32Array([
                                  0,0,0, 0,0,m, 0,0,
@@ -183,16 +184,31 @@ COGL.MeshModule=function(_cogl) {
                                  -m,m,0, 0,0,m, m,m,
                                  0,m,0, 0,0,m, 0,m
     ]);
-    /*TempVBOdata=new Float32Array([
-                                    -m,-m,0, 0,0,m, 0,0,
-                                     m,-m,0, 0,0,m, m,0,
-                                     m, m,0, 0,0,m, m,m,
-                                    -m, m,0, 0,0,m, 0,m
-    ]);*/
 
     TempIBOdata=new Uint16Array([0,1,2, 0,2,3]);
     
     _cogl.stockMeshes.edition=new _cogl.Mesh(TempVBOdata, TempIBOdata);
+
+
+    m = 3.0;//1.0;
+    n = 9.0;//3.0;
+    /*TempVBOdata=new Float32Array([
+                                 0,0,m, 0,m,0, 0,0,
+                                 -n,0,m, 0,m,0, m,0,
+                                 -n,0,0, 0,m,0, m,m,
+                                 0,0,0, 0,m,0, 0,m
+    ]);*/
+
+    TempVBOdata=new Float32Array([
+                                 0,0,m, 0,m,0, 0,0,
+                                 -n,0,m, 0,m,0, m,0,
+                                 -n,0,0, 0,m,0, m,m,
+                                 0,0,0, 0,m,0, 0,m
+    ]);
+
+    TempIBOdata=new Uint16Array([0,1,2, 0,2,3]);
+    
+    _cogl.stockMeshes.timetag=new _cogl.Mesh(TempVBOdata, TempIBOdata);
 
    /* _cogl.DynamicMesh=function(_vdata, _fdata) {
         this.VBOdata=_vdata;

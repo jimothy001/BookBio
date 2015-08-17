@@ -38,15 +38,19 @@ function Main()
 	unmat = new coGL.Material(coGL.shaders.default, {"uColor":[0.9,0.9,0.9,0.05]});
 	selunmat = new coGL.Material(coGL.shaders.default, {"uColor":[0.5,0.5,0.5,0.5]});
 
-	map = Map();
-	console.log(map.meshes);
-	timemark = TimeMark();
-	console.log(timemark.meshes);
+	map = new Map();
+	timemark = new TimeMark();
 
-	coGL.enableSelectionPass(modelsToSelect); //this appears to be the only pass that is necessary
-	//coGL.enableDepthPass(modelsToRender)//(modelsToSelect);
-	//coGL.enableUVPass(modelsToSelect); //is this perhaps necessary for texture rendering?
+	console.log(tagmodels);
+
+	coGL.enableSelectionPass(modelsToSelect);
+	//coGL.enableDepthPass(modelsToSelect);
+	//coGL.enableUVPass(modelsToSelect);
 	//coGL.enableWNormalPass(modelsToSelect);
+
+	//var texture3d=new coGL.Texture3d(64,32,32,[255,0,0,255]);
+
+	coGL.texturePass("back", "blury");
 
 	var viewpoint = vec3.create(); //starting position of GL camera
 	viewpoint[0] = 20.0;
@@ -97,9 +101,25 @@ function Main()
 				}
 				coGL.drawLines.commit();
 			}
+
+			for(var i in tagmodels)
+			{
+				tagmodels[i].tex.graphics.fillStyle="#ffffff";
+				tagmodels[i].tex.graphics.fillRect(0,0,tagmodels[i].tex.width,tagmodels[i].tex.height);
+
+				/*tagmodels[i].tex.graphics.fillStyle="#0000ff";
+				tagmodels[i].tex.graphics.fillRect(0,0,timemodels[0].tex.width,timemodels[0].tex.height);*/
+
+				tagmodels[i].tex.graphics.fillStyle="#000000";
+				tagmodels[i].tex.graphics.font="40px Courier";
+				tagmodels[i].tex.graphics.fillText(timemark.marks[i].date + "",tagmodels[i].tex.width*0.1, tagmodels[i].tex.width*0.4);
+
+				tagmodels[i].tex.update();
+			}
 		}).
-		renderModels(mapmodels).
 		renderModels(modelsToRender).
+		renderModels(mapmodels).
+		renderModels(tagmodels).
 		renderModels(timemodels).
 		activate();
 		
