@@ -133,34 +133,3 @@ function Map() //GEOGRAPHY //need to replace w/ single quad w/ texture
 
 	return this;
 }
-
-/*
-var ctex=coGL.createTextureWithCanvas(256, 256);
-ctex.graphics.fillRect(20,20,150,100);
-
-ctex.update();
-
-var mat2=new coGL.Material(coGL.shaders.phong,{"uColor":[0.7,0.7,0.7,1], "uSpecular": [1,1,1,50.0], "uAmbient":[0.1,0.1,0.1,1], "uTexture":0}, {"0":ctex});//coGL.textures.white
-*/
-/*
-ctex.graphics.fillStyle="#ffffff";
-ctex.graphics.fillRect(0,0,ctex.width,ctex.height);
-
-ctex.graphics.fillStyle="#ff0000";
-ctex.graphics.fillRect(0,0,ctex.width*coGL.mouse.pointUV[0],ctex.height*coGL.mouse.pointUV[1]);
-
-//every frame?
-ctex.graphics.fillStyle="#000000";
-ctex.graphics.font="20px Courier";
-ctex.graphics.fillText("c:"+coGL.mouse.pointUV[0],ctex.width*0.5, ctex.height*0.5);
-
-//every frame
-ctex.update();
-*/
-
-//remap
-/*function Remap(val, from1, to1, from2, to2)
-{
-	var result = (val - from1) / (to1 - from1) * (to2 - from2) + from2;
-	return result;
-}*/

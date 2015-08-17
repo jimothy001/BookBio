@@ -34,7 +34,6 @@ function Main()
 	//GL
 	coGL=COGL.init("canvas1");
 	gl=coGL.gl;
-	//var geomat = new coGL.Material(coGL.shaders.default, {"uColor":[0.97,0.97,0.97,0.5]});
 	unmat = new coGL.Material(coGL.shaders.default, {"uColor":[0.9,0.9,0.9,0.05]});
 	selunmat = new coGL.Material(coGL.shaders.default, {"uColor":[0.5,0.5,0.5,0.5]});
 
