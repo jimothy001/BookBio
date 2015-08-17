@@ -2,8 +2,7 @@ var http        = require('http');
 var parseString = require('xml2js').parseString;
 var _this       = this;
 var results     = [];
-
-
+var Q           = require('q');
 
 /*///////////////////////////
 // Create WorldCat request // 
@@ -58,31 +57,41 @@ _this._constructRequest = function(data) {
 
   query = queryBase + searchString + version + worldCatApiKey + pagingOptions;
   return query;
-
 }
 
 _this._makeRequest = function(query) {
-  console.log(query);
-  http.get(query, function(response){
-    response.setEncoding('utf8');
+  var deferred = Q.defer();
+
+  _this._httpGet(query).then(function (response) {
     var body = '';
+    response.setEncoding('utf8');
 
-  response.on('data', function(chunk){
-    body += chunk;
+    response.on('data', function(chunk){
+      body += chunk;
+    });
+
+    response.on('end', function() {
+      deferred.resolve(body);
+    });
+
+    response.on('error', function() {
+      console.log('error', error);
+      deferred.reject(error);
+    });
   });
 
-  response.on('end', function() {
-    _this._parse(body);
-  });
-
-  }).on('error', function(error) {
-    console.log("error", error)
-  });
+  return deferred.promise;
 }
+
+_this._httpGet = function (opts) {
+  var deferred = Q.defer();
+  http.get(opts, deferred.resolve);
+  return deferred.promise;
+};
 
 
 /*///////////////////////////////
-// Parse the worldcat response // 
+// Parse the WorldCat response // 
 ///////////////////////////////*/
 _this._findTag = function(data, tagNumber) {
   var tagData = data['$']['tag']; 
@@ -108,6 +117,7 @@ _this._findCode = function(data, codeNumber) {
 }
 
 _this._parse = function(data) {
+  var deferred = Q.defer();
   parseString(data, function (err, result) {
     var records = result['searchRetrieveResponse']['records'][0]['record'];
     var outputs = [];
@@ -149,12 +159,12 @@ _this._parse = function(data) {
           if (_this._findCode(itemData, 'a')) { edition = _this._findCode(itemData, 'a').value; }
           output['edition'] = edition;
         }
-
       }
       outputs.push(output);
     }
-    console.log(outputs);
+    deferred.resolve(outputs);
   });
+  return deferred.promise;
 }
 
 /*////////////////////////
@@ -162,8 +172,15 @@ _this._parse = function(data) {
 ////////////////////////*/
 module.exports =  {
   search: function(query) {
-    var data = _this._constructRequest(query);
-    _this._makeRequest(data);
-    // return _this._parse(response);
+    var deferred = Q.defer();
+    var wcQuery = _this._constructRequest(query);
+
+    _this._makeRequest(wcQuery).then(function (result) {
+      _this._parse(result).then(function (finalOutPut) {
+        deferred.resolve(finalOutPut);
+      });
+    });
+
+    return deferred.promise;
   }
 }

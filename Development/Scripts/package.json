@@ -4,17 +4,18 @@
   "version": "0.0.1",
   "private": true,
   "dependencies": {
-    "connect": "*",
-    "method-override": "*",
     "body-parser": "*",
-    "serve-static": "*",
-    "finalhandler": "*",
+    "connect": "*",
     "errorhandler": "*",
-    "routes": "*",
-    "socket.io": "*",
+    "finalhandler": "*",
+    "method-override": "*",
     "mongodb": "*",
     "node-geocoder": "*",
-    "xml2js": "^0.4.10",
-    "xlsx": "*"
+    "q": "^1.4.1",
+    "routes": "*",
+    "serve-static": "*",
+    "socket.io": "*",
+    "xlsx": "*",
+    "xml2js": "^0.4.10"
   }
 }

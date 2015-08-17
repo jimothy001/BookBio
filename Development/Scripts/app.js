@@ -6,6 +6,7 @@ var serveStatic = require('serve-static');
 var finalhandler = require('finalhandler');
 var errorhandler = require('errorhandler');
 var Worldcat = require('./Worldcat');
+var q = require('q');
 
 //geocoder module
 var geocodeprovider = 'opencage';
@@ -169,7 +170,10 @@ io.sockets.on('connection', function (socket) {
 	socket.on('SearchQuery', function(query)
 	{
 		if (query.length != 0){
-			Worldcat.search(query);
+			// var deferred = Q.defer();
+			Worldcat.search(query).then(function (result){
+				console.log(result);
+			});
 		} else {
 			console.log('empty search dude');
 		}
