@@ -121,6 +121,14 @@ UI.prototype.WorldCat = function()
 
 		var dropdown = this.worldcat.addCombo(_dropdowns[i], i, length + "px");
 		dropdown.parent = this.worldcat;
+
+		// Default values
+		var dropdownName = _dropdowns[i][0]['name'];
+		if (dropdownName === 'any audience') { dropdown.parent.terms[i] = 'any audience'; }
+		if (dropdownName === 'any content') { dropdown.parent.terms[i] = 'any content'; }
+		if (dropdownName === 'all formats') { dropdown.parent.terms[i] = 'all formats'; }
+		if (dropdownName === 'all languages') { dropdown.parent.terms[i] = 'all languages'; }
+
 		dropdown.name = i;
 		dropdown.defaultterm = _dropdowns[i][0].name;
 		dropdown.setOnChanged(function(e)
@@ -140,12 +148,7 @@ UI.prototype.WorldCat = function()
 	trigger.setOnPressed(function(e)
 	{
 		var terms = this.parent.terms;
-
-		//***
-		//ALEX, DO SOCKETY THINGS HERE!!!!!!!!!
-		//***
-
-		console.log(terms);
+		queueMsg('SearchQueryInitiated', terms);
 	});
 
 	//less is more
