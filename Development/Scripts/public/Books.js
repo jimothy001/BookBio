@@ -51,6 +51,11 @@ function Read(event)
 	else console.log("no files in upload");
 }
 
+function queryResponse(event) {
+	console.log(event.data);
+	new Collection(event.name, event.data);
+}
+
 function loadBinaryFile(path, success) {
     var files = path.target.files;
     var reader = new FileReader();

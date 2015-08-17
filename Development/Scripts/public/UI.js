@@ -148,7 +148,7 @@ UI.prototype.WorldCat = function()
 	trigger.setOnPressed(function(e)
 	{
 		var terms = this.parent.terms;
-		queueMsg('SearchQuery', terms);
+		queueMsg('SearchQueryInitiated', terms);
 	});
 
 	//less is more

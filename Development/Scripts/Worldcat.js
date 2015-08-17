@@ -116,6 +116,10 @@ _this._findCode = function(data, codeNumber) {
   return result;
 }
 
+_this._cleanup = function(obj) {
+  return obj.replace(/[\©.,:/]/g, "");
+}
+
 _this._parse = function(data) {
   var deferred = Q.defer();
   parseString(data, function (err, result) {
@@ -147,11 +151,11 @@ _this._parse = function(data) {
         // PUBLICATION CITY, DATE, & PUBLISHER
         if (_this._findTag(itemData, '260')) {
           if (_this._findCode(itemData, 'a')) { publicationCity = _this._findCode(itemData, 'a').value; }
-          output['publicationCity'] = publicationCity;
+          output['place'] = _this._cleanup(publicationCity);
           if (_this._findCode(itemData, 'b')) { publisher = _this._findCode(itemData, 'b').value; }
           output['publisher'] = publisher;
           if (_this._findCode(itemData, 'c')) { publicationDate = _this._findCode(itemData, 'c').value; }
-          output['publicationDate'] = publicationDate;
+          output['year'] = _this._cleanup(publicationDate);
         }
 
         // Edition
@@ -167,17 +171,30 @@ _this._parse = function(data) {
   return deferred.promise;
 }
 
+
 /*////////////////////////
 // Public Search method // 
 ////////////////////////*/
 module.exports =  {
+
+  createNameFromQuery: function(query) {
+    var name = 'WorldCat Search: ';
+    var fields = query['fields'];
+    for (var field in fields) {
+      if (fields[field] !== ''){
+        name += fields[field] + ' ' 
+      }
+    }
+    return name;
+  },
+
   search: function(query) {
     var deferred = Q.defer();
     var wcQuery = _this._constructRequest(query);
 
     _this._makeRequest(wcQuery).then(function (result) {
-      _this._parse(result).then(function (finalOutPut) {
-        deferred.resolve(finalOutPut);
+      _this._parse(result).then(function (finalOutput) {
+        deferred.resolve(finalOutput);
       });
     });
 
