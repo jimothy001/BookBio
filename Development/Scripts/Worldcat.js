@@ -76,7 +76,6 @@ _this._makeRequest = function(query) {
     });
 
     response.on('error', function() {
-      console.log('error', error);
       deferred.reject(error);
     });
   });
