@@ -1,7 +1,7 @@
 # BookBio
 The Book Biography Machine
 
-navigate to ```Development/Scripts/```
+First navigate to ```Development/Scripts/``` and then go wild with the instructions below.
 
 ### Install Dependencies
 ```
