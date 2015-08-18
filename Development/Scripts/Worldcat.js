@@ -38,7 +38,8 @@ _this._constructRequest = function(data) {
   var query          = '';
   var version        = '&version=1.1';
   var worldCatApiKey = '&operation=searchRetrieve&wskey=GwpUhR9ag9TLFAGLt6qTkPpIVCSetHrvnOvCY7FWE9pEbPztqmCjCFGWII8sbfpaGZ2CeLwGwXg7pHpC';
-  var pagingOptions  = '&recordSchema=&maximumRecords=10&startRecord=1&recordPacking=xml&servicelevel=default&sortKeys=relevance&resultSetTTL=300&recordXPath=';
+  var count          = '100';
+  var pagingOptions  = '&recordSchema=&maximumRecords=' + count + '&startRecord=1&recordPacking=xml&servicelevel=default&sortKeys=relevance&resultSetTTL=300&recordXPath=';
 
   for (var key in fields) {
     if (fields[key] !== '') {
@@ -117,7 +118,10 @@ _this._findCode = function(data, codeNumber) {
 }
 
 _this._cleanup = function(obj) {
-  return year = obj.replace(/[\©.,:/]/g, "");
+  if (obj[obj.length-1] === '-') {
+    obj = obj.substring(0, obj.length-1); // trim off the often occuring "-" at the end of the string
+  }
+  return year = obj.replace(/[\©.,<pc></pc>?()\[\]\:/]/g, "");
 }
 
 // Convert "1845-1942" into an object with `yearStart` & `yearEnd`
