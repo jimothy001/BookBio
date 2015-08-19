@@ -22,7 +22,7 @@ function UI()
 UI.prototype.WorldCat = function()
 {
 	this.worldcat = this.parentstack.addStack("worldcat search").setCollapsible(true);
-	var _yearfrom = 0;
+	/*var _yearfrom = 0;
 	var _yearto = 2015;
 	var _audience = [{name:"any audience"},{name:"juvenile"},{name:"non-juvenile"}];
 	var _content = [{name:"any content"},{name:"fiction"},{name:"non-fiction"},{name:"biography"},{name:"thesis/dissertations"}];
@@ -45,11 +45,36 @@ UI.prototype.WorldCat = function()
 
 	var _fields = {"keyword":"","title":"","author":"","subject":"","accession number":"","isbn":"","issn":"","journal source":""};
 	var __fields = {"keyword":"","title":"","author":"","subject":"","accession number":"","isbn":"","issn":"","journal source":""};	
-	var _years = {"yearfrom":_yearfrom, "yearto":_yearto};
+	//var _years = {"yearfrom":_yearfrom, "yearto":_yearto};
 	var _dropdowns = {"audience":_audience, "content":_content, "format":_format, "language":_language};
 
 	this.worldcat.terms = {"fields":_fields, "yearfrom":_yearfrom, "yearto":_yearto, "audience":_audience[0].name, "content":_content[0].name, "format":_format[0].name, "language":_language[0].name};//***
-	var defaultterms = {"fields":__fields, "yearfrom":_yearfrom, "yearto":_yearto, "audience":_audience[0].name, "content":_content[0].name, "format":_format[0].name, "language":_language[0].name};
+	var defaultterms = {"fields":__fields, "yearfrom":_yearfrom, "yearto":_yearto, "audience":_audience[0].name, "content":_content[0].name, "format":_format[0].name, "language":_language[0].name};*/
+	
+	var _format = 
+				[
+				{name:"all formats"},{name:"archival material"},{name:"article"},{name:"audiobook"},
+				{name:"book"},{name:"--- braile book"},{name:"--- large print"},{name:"journal, magazine"},
+				{name:"map"},{name:"music"},{name:"musical score"},{name:"newspaper"},{name:"sound recording"},
+				{name:"game"},{name:"visual material"}
+	 			]; //online media is excluded*/
+	var _language = 
+				[
+				{name:"all languages"},{name:"english"},{name:"arabic"},{name:"bulgarian"},{name:"chinese"},
+				{name:"croatian"},{name:"czech"},{name:"danish"},{name:"dutch"},{name:"french"},{name:"german"}, 
+				{name:"greek, modern [1453-]"},{name:"hebrew"},{name:"hindi"},{name:"indonesian"},{name:"italian"},
+				{name:"japanese"},{name:"korean"},{name:"latin"},{name:"norwegian"},{name:"persian"},{name:"polish"},
+				{name:"portuguese"},{name:"romanian"},{name:"russian"},{name:"spanish"},{name:"swedish"},{name:"thai"},
+				{name:"turkish"},{name:"ukrainian"},{name:"vietnamese"}
+				]; 
+
+	var _fields = {"keyword":"","title":"","author":"","subject":"","isbn":"","issn":"","journal source":""};
+	var __fields = {"keyword":"","title":"","author":"","subject":"","isbn":"","issn":"","journal source":""};	
+	//var _years = {"yearfrom":_yearfrom, "yearto":_yearto};
+	var _dropdowns = {"language":_language};
+
+	this.worldcat.terms = {"fields":_fields, "format":_format[0].name, "language":_language[0].name};//***
+	var defaultterms = {"fields":__fields, "format":_format[0].name, "language":_language[0].name};
 
 	//worldcat ui structure
 	this.worldcat.termsui = [];
@@ -87,7 +112,7 @@ UI.prototype.WorldCat = function()
 	this.worldcat.termsui.push(this.worldcat.textfields);
 
 	//time domain
-	for(var i in _years)
+	/*for(var i in _years)
 	{
 		var numfield = this.worldcat.addTextInput(null, i);
 		numfield.parent = this.worldcat;
@@ -112,7 +137,7 @@ UI.prototype.WorldCat = function()
 
 		this.worldcat.numfields.push(numfield);
 	}
-	this.worldcat.termsui.push(this.worldcat.numfields);
+	this.worldcat.termsui.push(this.worldcat.numfields);*/
 
 	//dropdown criteria
 	for(var i in _dropdowns)
@@ -124,8 +149,8 @@ UI.prototype.WorldCat = function()
 
 		// Default values
 		var dropdownName = _dropdowns[i][0]['name'];
-		if (dropdownName === 'any audience') { dropdown.parent.terms[i] = 'any audience'; }
-		if (dropdownName === 'any content') { dropdown.parent.terms[i] = 'any content'; }
+		//if (dropdownName === 'any audience') { dropdown.parent.terms[i] = 'any audience'; }
+		//if (dropdownName === 'any content') { dropdown.parent.terms[i] = 'any content'; }
 		if (dropdownName === 'all formats') { dropdown.parent.terms[i] = 'all formats'; }
 		if (dropdownName === 'all languages') { dropdown.parent.terms[i] = 'all languages'; }
 
@@ -148,6 +173,7 @@ UI.prototype.WorldCat = function()
 	trigger.setOnPressed(function(e)
 	{
 		var terms = this.parent.terms;
+		console.log(terms);
 		queueMsg('SearchQueryInitiated', terms);
 	});
 
@@ -262,7 +288,7 @@ function Read(event)
 		    	var sheet_name = workbook.SheetNames[i];
 		    	var worksheet = workbook.Sheets[sheet_name];
 		    	var name = sheet_name;
-		    	var keys = GetJSONKeys(worksheet);
+		    	var keys = GetJSONKeysFromWorksheet(worksheet);
 		    	var data = XLSX.utils.sheet_to_json(worksheet); //super useful!
 
 		    	var c = new Collection(name, data, keys);
@@ -283,7 +309,7 @@ function loadBinaryFile(path, success) {
     reader.readAsBinaryString(files[0]);
 }
 
-function GetJSONKeys(_worksheet)
+function GetJSONKeysFromWorksheet(_worksheet)
 {
 	var keys = [];
 
@@ -297,6 +323,65 @@ function GetJSONKeys(_worksheet)
 		else break;
 	}
 	return keys;
+}
+
+function GetJSONKeysFromArray(_data) 
+{
+	console.log(_data);
+
+	//var keys = [];
+
+	var keys = ExtractFirstKeys(_data[0]);
+	//keys.concat(firstkeys);
+
+	for(var i in _data)
+	{
+		var uniquekeys = ExtractUniqueKeys(keys, _data[i]);
+		keys.concat(uniquekeys);
+	}
+
+	return keys;
+}
+
+function ExtractFirstKeys(o)
+{
+	console.log("ExtractFirstKeys");
+
+	var firstkeys = [];
+
+	for(var j in o)
+	{
+		firstkeys.push(j+"");
+	}
+
+	console.log(firstkeys);
+
+	return firstkeys;
+}
+
+function ExtractUniqueKeys(checkkeys, o)
+{
+	console.log("ExtractUniqueKeys");
+
+	var uniquekeys = [];
+
+	for(var j in o)
+	{
+		var check = false;
+
+		for(var k in checkkeys)
+		{
+			if(j == checkkeys[k])
+			{
+				check = true;
+				break;
+			}
+		}
+
+		if(check) uniquekeys.push(j+"");
+	}
+
+	return uniquekeys;
 }
 
 function Write()

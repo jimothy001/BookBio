@@ -168,6 +168,8 @@ io.sockets.on('connection', function (socket) {
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	socket.on('SearchQueryInitiated', function(query)
 	{
+		console.log('SearchQueryInitiated');
+
 		if (query.length != 0){
 			Worldcat.search(query).then(function (data){
 				var name = Worldcat.createNameFromQuery(query);

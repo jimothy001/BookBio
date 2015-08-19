@@ -35,11 +35,17 @@ function Collection(_name, _data, _keys)
 
 	var ci = collections.length; //this collection's index after it is added to collections array
 
+	console.log(this.keys);
+
 	for(var i in _data) //instantate editions and add them to collections
 	{
+		console.log(_data[i]);
+
 		var e = new Edition(ci, i, this.keys, _data[i], this.emat);
 		this.editions.push(e);
 	}
+
+	console.log("editions count:" + this.editions.length);
 
 	if(geoquery.length > 0) QueryGeo(); //if there are queries for geographic information... query them.
 
@@ -147,13 +153,17 @@ function Edition(_c, _e, _keys, _data, _emat)
 	}
 
 	//graphics
+	console.log(this.data.place);
 	this.place = this.data.place;
 	this.lt = 1.0;
 	this.lg = 1.0;
-	this.year = this.data.year;
+	this.yearstart = 0;//this.data.year;
+	this.yearend = 0;
+	this.range = false;
 	this.x = 50.0;
 	this.y = -25.0;
 	this.z = 41.0;
+	this.zz = 41.0;
 
 	if(this.lt == 1.0 && this.lg == 1.0)
 	{
@@ -166,11 +176,27 @@ function Edition(_c, _e, _keys, _data, _emat)
 		}
 	}
 
+	console.log(this.data.date);
+
 	//temporal data //***allow for continuous remaping of year
-	if(this.year != null)
+	if(this.data.year)
 	{
-			this.year = parseInt(_data.year);
-			this.z = Remap(this.year, 1300.0, 1900.0, 0.0, 40.0);
+			this.yearstart = parseInt(_data.year);
+			this.yearend = parseInt(_data.year);
+			this.z = Remap(this.yearstart, 1300.0, 1900.0, 0.0, 40.0);
+			this.zz = this.z;
+	}
+	else if(this.data.date)
+	{	
+			if(this.data.date.yearStart) this.yearstart = parseInt(this.data.date.yearStart);
+			else this.yearstart = 0;
+			if(this.data.date.yearEnd) this.yearend = parseInt(this.data.date.yearEnd)
+			else this.yearend = this.yearstart;
+
+			console.log(this.yearstart + " " + this.yearend);
+
+			this.z = Remap(this.yearstart, 1300.0, 1900.0, 0.0, 40.0);
+			this.zz = Remap(this.yearend, 1300.0, 1900.0, 0.0, 40.0);
 	}
 
 	//geo line
@@ -191,7 +217,7 @@ function Edition(_c, _e, _keys, _data, _emat)
 
 	this.emat = _emat;
 	this.currentmat = this.emat;
-	this.book = new coGL.Model(coGL.stockMeshes.edition, this.x, this.y, this.z);
+	this.book = this.Model(); //new coGL.Model(coGL.stockMeshes.edition, this.x, this.y, this.z);
 	this.book.material = this.currentmat;
 	this.book.parent = this;
 	coGL.selectable(this.book);
@@ -199,6 +225,68 @@ function Edition(_c, _e, _keys, _data, _emat)
 	modelsToRender.push(this.book);
 	this.book.onMouseLeave = function() {select = null}; //not going to be clicked :(
 	this.book.onMouseEnter = function() {select = this.parent;}; //I might be clicked :)
+}
+
+Edition.prototype.Model = function()
+{
+	var mesh;
+
+	if(this.yearstart == this.yearend) mesh = coGL.stockMeshes.edition;
+	else
+	{
+		console.log("date range mesh");
+
+		
+		var _z = 10.0;//this.zz - this.z;
+		var m = 3.0 / _z;
+
+		//what if the mesh needs to be dynamic?
+
+		var VBO = 
+		[
+		    m,0,0, 0,0,-m, 0,0,
+		    m,m,0, 0,0,-m, 1,0,
+		    0,0,0, 0,0,-m, 0,1,
+		    0,m,0, 0,0,-m, 1,1,
+
+		    0,0,_z, 0,0,m, 0,0,
+		    0,m,_z, 0,0,m, 1,0,
+		    m,0,_z, 0,0,m, 0,1,
+		    m,m,_z, 0,0,m, 1,1,
+
+		    0,0,0, -m,0,0, 0,0,
+		    0,m,0, -m,0,0, 1,0,
+		    0,0,_z, -m,0,0, 0,1,
+		    0,m,_z, -m,0,0, 1,1,
+
+		    0,m,0, 0,m,0, 0,0,
+		    m,m,0, 0,m,0, 1,0,
+		    0,m,_z, 0,m,0, 0,1,
+		    m,m,_z, 0,m,0, 1,1,
+
+		    m,m,0, m,0,0, 0,0,
+		    m,0,0, m,0,0, 1,0,
+		    m,m,_z, m,0,0, 0,1,
+		    m,0,_z, m,0,0, 1,1,
+
+		    m,0,0, 0,-m,0, 0,0,
+		    0,0,0, 0,-m,0, 1,0,
+		    m,0,_z, 0,-m,0, 0,1,
+		    0,0,_z, 0,-m,0, 1,1
+	    ];
+
+	    var IBO = [0,2,3,4,6,7,8,10,11,12,14,15,16,18,19,20,22,23,0,3,1,4,7,5,8,11,9,12,15,13,16,19,17,20,23,21];
+
+    	mesh = new coGL.Mesh(VBO, IBO);
+
+    	console.log(mesh);
+	}
+
+	//var mesh = coGL.stockMeshes.edition;
+
+	var model = new coGL.Model(mesh, this.x, this.y, this.z);
+
+	return model;
 }
 
 //map year to z value

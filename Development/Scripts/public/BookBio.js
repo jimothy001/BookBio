@@ -233,7 +233,13 @@ socket.on("_QueryGeo", function(_data)
 });
 
 socket.on("SearchQueryResult", function(_data) {
-	var c = new Collection(name, data);
+	console.log('SearchQueryResult');
+
+	var name = _data.name;"WorldCatQuery"; //temp
+	var data = _data.data;
+	var keys = GetJSONKeysFromArray(_data.data);
+
+	var c = new Collection(name, data, keys);
 });
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
