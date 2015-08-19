@@ -38,7 +38,8 @@ _this._constructRequest = function(data) {
   var query          = '';
   var version        = '&version=1.1';
   var worldCatApiKey = '&operation=searchRetrieve&wskey=GwpUhR9ag9TLFAGLt6qTkPpIVCSetHrvnOvCY7FWE9pEbPztqmCjCFGWII8sbfpaGZ2CeLwGwXg7pHpC';
-  var pagingOptions  = '&recordSchema=&maximumRecords=10&startRecord=1&recordPacking=xml&servicelevel=default&sortKeys=relevance&resultSetTTL=300&recordXPath=';
+  var count          = '100';
+  var pagingOptions  = '&recordSchema=&maximumRecords=' + count + '&startRecord=1&recordPacking=xml&servicelevel=default&sortKeys=relevance&resultSetTTL=300&recordXPath=';
 
   for (var key in fields) {
     if (fields[key] !== '') {
@@ -75,7 +76,6 @@ _this._makeRequest = function(query) {
     });
 
     response.on('error', function() {
-      console.log('error', error);
       deferred.reject(error);
     });
   });
@@ -117,7 +117,23 @@ _this._findCode = function(data, codeNumber) {
 }
 
 _this._cleanup = function(obj) {
-  return obj.replace(/[\©.,:/]/g, "");
+  if (obj[obj.length-1] === '-') {
+    obj = obj.substring(0, obj.length-1); // trim off the often occuring "-" at the end of the string
+  }
+  return year = obj.replace(/[\©.,<pc></pc>?()\[\]\:/]/g, "");
+}
+
+// Convert "1845-1942" into an object with `yearStart` & `yearEnd`
+_this._splitDate= function(date) {
+  var newDate = {};
+  if (date.indexOf('-') != -1) {
+    var dates = date.split('-', 2);
+    newDate['yearStart'] = parseInt(dates[0], 10);
+    newDate['yearEnd']   = parseInt(dates[1], 10);
+  } else {
+    newDate['yearStart'] = parseInt(date, 10);
+  }
+  return newDate;
 }
 
 _this._parse = function(data) {
@@ -132,7 +148,7 @@ _this._parse = function(data) {
 
       for (var item in recordData) {
         var itemData = recordData[item];
-        var author, title, subTitle, publicationCity, publicationDate, edition, publisher;
+        var author, title, subTitle, publicationCity, year, edition, publisher;
 
         // AUTHOR
         if (_this._findTag(itemData, '100')) {
@@ -143,6 +159,7 @@ _this._parse = function(data) {
         // TITLE & SUBTITLE
         if (_this._findTag(itemData, '245')) {
           if (_this._findCode(itemData, 'a')) { title    = _this._findCode(itemData, 'a').value; }
+
           if (_this._findCode(itemData, 'c')) { subTitle = _this._findCode(itemData, 'c').value; }
           output['title'] = title;
           output['subTitle'] = subTitle;
@@ -150,12 +167,21 @@ _this._parse = function(data) {
 
         // PUBLICATION CITY, DATE, & PUBLISHER
         if (_this._findTag(itemData, '260')) {
-          if (_this._findCode(itemData, 'a')) { publicationCity = _this._findCode(itemData, 'a').value; }
-          output['place'] = _this._cleanup(publicationCity);
-          if (_this._findCode(itemData, 'b')) { publisher = _this._findCode(itemData, 'b').value; }
-          output['publisher'] = publisher;
-          if (_this._findCode(itemData, 'c')) { publicationDate = _this._findCode(itemData, 'c').value; }
-          output['year'] = _this._cleanup(publicationDate);
+          if (_this._findCode(itemData, 'a')) { 
+            publicationCity = _this._findCode(itemData, 'a').value; 
+            output['place'] = _this._cleanup(publicationCity);
+          }
+
+          if (_this._findCode(itemData, 'b')) { 
+            publisher = _this._findCode(itemData, 'b').value; 
+            output['publisher'] = publisher;
+          }
+
+          if (_this._findCode(itemData, 'c')) { 
+            year = _this._findCode(itemData, 'c').value;
+            year = _this._cleanup(year);
+            output.date = _this._splitDate(year);
+          }
         }
 
         // Edition
@@ -165,6 +191,7 @@ _this._parse = function(data) {
         }
       }
       outputs.push(output);
+      console.log(output);
     }
     deferred.resolve(outputs);
   });
