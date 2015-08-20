@@ -40,7 +40,8 @@ function Main()
 	targetpoint[0] = 2.75;
 	targetpoint[1] = 0.0;
 	targetpoint[2] = 15.0;
-	coGL.camera.setViewPoint(viewpoint).setTargetPoint(targetpoint).setDistance(cameradistance).setFar(200.0).update(); //set GL start and viewpoint of camera. 
+	coGL.camera.maxDistance = maxdistance;
+	coGL.camera.setViewPoint(viewpoint).setTargetPoint(targetpoint).setDistance(cameradistance).setFar(300.0).update(); //set GL start and viewpoint of camera. 
 
 	var light=new coGL.Camera(); //GL light - try doing without this
 	light.easeIn=0.0;
@@ -158,8 +159,8 @@ function Main()
 
 		if(e.wheelDelta > 0)
 		{
-			console.log("+");
-			if(cameradistance > 5.0)
+			//console.log("+");
+			if(cameradistance > mindistance)
 			{
 				cameradistance -= 4.0;
 				coGL.camera.setDistance(cameradistance);
@@ -167,13 +168,15 @@ function Main()
 		}
 		else if(e.wheelDelta < 0)
 		{
-			console.log("-");
-			if(cameradistance < 90.0)
+			//console.log("-");
+			if(cameradistance < maxdistance)
 			{
 				cameradistance += 4.0;
 				coGL.camera.setDistance(cameradistance);
 			}
 		}
+
+		console.log(cameradistance);
 	});
 
 
