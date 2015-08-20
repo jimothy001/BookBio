@@ -176,7 +176,7 @@ function Main()
 			}
 		}
 
-		console.log(cameradistance);
+		//console.log(cameradistance);
 	});
 
 
