@@ -1,7 +1,3 @@
-//UI
-
-//var dli;
-
 function UI()
 {
 	this.parentstack=new CO.UIStack(document.body).setLabel(".").setCollapsible(true);
@@ -22,34 +18,6 @@ function UI()
 UI.prototype.WorldCat = function()
 {
 	this.worldcat = this.parentstack.addStack("worldcat search").setCollapsible(true);
-	/*var _yearfrom = 0;
-	var _yearto = 2015;
-	var _audience = [{name:"any audience"},{name:"juvenile"},{name:"non-juvenile"}];
-	var _content = [{name:"any content"},{name:"fiction"},{name:"non-fiction"},{name:"biography"},{name:"thesis/dissertations"}];
-	var _format = 
-				[
-				{name:"all formats"},{name:"archival material"},{name:"article"},{name:"audiobook"},
-				{name:"book"},{name:"--- braile book"},{name:"--- large print"},{name:"journal, magazine"},
-				{name:"map"},{name:"music"},{name:"musical score"},{name:"newspaper"},{name:"sound recording"},
-				{name:"game"},{name:"visual material"}
-	 			]; //online media is excluded
-	var _language = 
-				[
-				{name:"all languages"},{name:"english"},{name:"arabic"},{name:"bulgarian"},{name:"chinese"},
-				{name:"croatian"},{name:"czech"},{name:"danish"},{name:"dutch"},{name:"french"},{name:"german"}, 
-				{name:"greek, modern [1453-]"},{name:"hebrew"},{name:"hindi"},{name:"indonesian"},{name:"italian"},
-				{name:"japanese"},{name:"korean"},{name:"latin"},{name:"norwegian"},{name:"persian"},{name:"polish"},
-				{name:"portuguese"},{name:"romanian"},{name:"russian"},{name:"spanish"},{name:"swedish"},{name:"thai"},
-				{name:"turkish"},{name:"ukrainian"},{name:"vietnamese"}
-				]; 
-
-	var _fields = {"keyword":"","title":"","author":"","subject":"","accession number":"","isbn":"","issn":"","journal source":""};
-	var __fields = {"keyword":"","title":"","author":"","subject":"","accession number":"","isbn":"","issn":"","journal source":""};	
-	//var _years = {"yearfrom":_yearfrom, "yearto":_yearto};
-	var _dropdowns = {"audience":_audience, "content":_content, "format":_format, "language":_language};
-
-	this.worldcat.terms = {"fields":_fields, "yearfrom":_yearfrom, "yearto":_yearto, "audience":_audience[0].name, "content":_content[0].name, "format":_format[0].name, "language":_language[0].name};//***
-	var defaultterms = {"fields":__fields, "yearfrom":_yearfrom, "yearto":_yearto, "audience":_audience[0].name, "content":_content[0].name, "format":_format[0].name, "language":_language[0].name};*/
 	
 	var _format = 
 				[
@@ -68,9 +36,8 @@ UI.prototype.WorldCat = function()
 				{name:"turkish"},{name:"ukrainian"},{name:"vietnamese"}
 				]; 
 
-	var _fields = {"keyword":"","title":"","author":"","subject":"","isbn":"","issn":"","journal source":""};
-	var __fields = {"keyword":"","title":"","author":"","subject":"","isbn":"","issn":"","journal source":""};	
-	//var _years = {"yearfrom":_yearfrom, "yearto":_yearto};
+	var _fields = {"keyword":"","title":"","author":"","subject":"","isbn":"","issn":""};
+	var __fields = {"keyword":"","title":"","author":"","subject":"","isbn":"","issn":""};	
 	var _dropdowns = {"language":_language};
 
 	this.worldcat.terms = {"fields":_fields, "format":_format[0].name, "language":_language[0].name};//***
@@ -111,34 +78,6 @@ UI.prototype.WorldCat = function()
 	}
 	this.worldcat.termsui.push(this.worldcat.textfields);
 
-	//time domain
-	/*for(var i in _years)
-	{
-		var numfield = this.worldcat.addTextInput(null, i);
-		numfield.parent = this.worldcat;
-		numfield.name = i;
-		numfield.defaultterm = 0;
-		if(i == "yearto") numfield.defaultterm = 2015;
-		numfield.makeNumeric(true, 0, 2015, numfield.bound);
-
-		numfield.setOnChanged(function(v)
-		{
-			if(v == null || isNaN(v) || v === undefined)
-			{
-				v = this.defaultterm;
-			}
-
-			this.text = v;
-			this.textInput.value = v;
-			this.parent.terms[this.name] = v;
-
-			return v;
-		});
-
-		this.worldcat.numfields.push(numfield);
-	}
-	this.worldcat.termsui.push(this.worldcat.numfields);*/
-
 	//dropdown criteria
 	for(var i in _dropdowns)
 	{
@@ -149,8 +88,6 @@ UI.prototype.WorldCat = function()
 
 		// Default values
 		var dropdownName = _dropdowns[i][0]['name'];
-		//if (dropdownName === 'any audience') { dropdown.parent.terms[i] = 'any audience'; }
-		//if (dropdownName === 'any content') { dropdown.parent.terms[i] = 'any content'; }
 		if (dropdownName === 'all formats') { dropdown.parent.terms[i] = 'all formats'; }
 		if (dropdownName === 'all languages') { dropdown.parent.terms[i] = 'all languages'; }
 
@@ -488,6 +425,67 @@ function SheetFrom2dArray(data, opts) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /*
+	//from WorldCat
+
+	var _yearfrom = 0;
+	var _yearto = 2015;
+	var _audience = [{name:"any audience"},{name:"juvenile"},{name:"non-juvenile"}];
+	var _content = [{name:"any content"},{name:"fiction"},{name:"non-fiction"},{name:"biography"},{name:"thesis/dissertations"}];
+	var _format = 
+				[
+				{name:"all formats"},{name:"archival material"},{name:"article"},{name:"audiobook"},
+				{name:"book"},{name:"--- braile book"},{name:"--- large print"},{name:"journal, magazine"},
+				{name:"map"},{name:"music"},{name:"musical score"},{name:"newspaper"},{name:"sound recording"},
+				{name:"game"},{name:"visual material"}
+	 			]; //online media is excluded
+	var _language = 
+				[
+				{name:"all languages"},{name:"english"},{name:"arabic"},{name:"bulgarian"},{name:"chinese"},
+				{name:"croatian"},{name:"czech"},{name:"danish"},{name:"dutch"},{name:"french"},{name:"german"}, 
+				{name:"greek, modern [1453-]"},{name:"hebrew"},{name:"hindi"},{name:"indonesian"},{name:"italian"},
+				{name:"japanese"},{name:"korean"},{name:"latin"},{name:"norwegian"},{name:"persian"},{name:"polish"},
+				{name:"portuguese"},{name:"romanian"},{name:"russian"},{name:"spanish"},{name:"swedish"},{name:"thai"},
+				{name:"turkish"},{name:"ukrainian"},{name:"vietnamese"}
+				]; 
+
+	var _fields = {"keyword":"","title":"","author":"","subject":"","accession number":"","isbn":"","issn":"","journal source":""};
+	var __fields = {"keyword":"","title":"","author":"","subject":"","accession number":"","isbn":"","issn":"","journal source":""};	
+	var _years = {"yearfrom":_yearfrom, "yearto":_yearto};
+	var _dropdowns = {"audience":_audience, "content":_content, "format":_format, "language":_language};
+
+	this.worldcat.terms = {"fields":_fields, "yearfrom":_yearfrom, "yearto":_yearto, "audience":_audience[0].name, "content":_content[0].name, "format":_format[0].name, "language":_language[0].name};//***
+	var defaultterms = {"fields":__fields, "yearfrom":_yearfrom, "yearto":_yearto, "audience":_audience[0].name, "content":_content[0].name, "format":_format[0].name, "language":_language[0].name};
+
+		//if (dropdownName === 'any audience') { dropdown.parent.terms[i] = 'any audience'; }
+		//if (dropdownName === 'any content') { dropdown.parent.terms[i] = 'any content'; }
+
+	//time domain
+	for(var i in _years)
+	{
+		var numfield = this.worldcat.addTextInput(null, i);
+		numfield.parent = this.worldcat;
+		numfield.name = i;
+		numfield.defaultterm = 0;
+		if(i == "yearto") numfield.defaultterm = 2015;
+		numfield.makeNumeric(true, 0, 2015, numfield.bound);
+
+		numfield.setOnChanged(function(v)
+		{
+			if(v == null || isNaN(v) || v === undefined)
+			{
+				v = this.defaultterm;
+			}
+
+			this.text = v;
+			this.textInput.value = v;
+			this.parent.terms[this.name] = v;
+
+			return v;
+		});
+
+		this.worldcat.numfields.push(numfield);
+	}
+	this.worldcat.termsui.push(this.worldcat.numfields);
 
 var yearfrom = this.worldcat.addTextInput(null, "year from:").makeNumeric(false, 0, 2020)
 yearfrom.parent = this.worldcat;

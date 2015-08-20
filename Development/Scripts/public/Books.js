@@ -1,14 +1,3 @@
-/*//GENERAL
-var ui;
-var collections = [];
-var select= null;
-var currentselect = null;
-var unmat;
-var selunmat;
-var geoinfo = []; //This should be checked with each new set of bibliographic results for each new collection for to prevent redundant queries to 3rd parties.
-var geoquery = [];*/
-
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //COLLECTION CLASS // SQUARES!
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -28,8 +17,8 @@ function Collection(_name, _data, _keys)
 	this.editions = []; //collection of editions
 	this.active = true;
 	var color = this.SetColors();
-	this.emat =  new coGL.Material(coGL.shaders.normal_color,{"uColor":color, "uLightness": 0.7});
-	this.smat = new coGL.Material(coGL.shaders.normal_color, {"uColor":color, "uLightness": 0.3});
+	this.emat =  new coGL.Material(coGL.shaders.default,{"uColor":color}); //new coGL.Material(coGL.shaders.normal_color,{"uColor":color, "uLightness": 0.7});
+	this.smat = new coGL.Material(coGL.shaders.normal_color, {"uColor":color, "uLightness": 0.9});
 	this.unmat = unmat;
 	this.selunmat = selunmat;
 
@@ -39,7 +28,7 @@ function Collection(_name, _data, _keys)
 
 	for(var i in _data) //instantate editions and add them to collections
 	{
-		console.log(_data[i]);
+		//console.log(_data[i]);
 
 		var e = new Edition(ci, i, this.keys, _data[i], this.emat);
 		this.editions.push(e);
@@ -61,7 +50,7 @@ Collection.prototype.SetColors = function()
 	var r = Math.random();
 	var g = Math.random();
 	var b = Math.random();
-	var a = 0.5;
+	var a = 0.85;
 
 	//var color = [1.0, 0.4, 0.9, 0.5];
 	var color = [r,g,b,a];
@@ -82,7 +71,7 @@ Collection.prototype.UpdateGeo = function(_edition)
 
 Collection.prototype.Activate = function()
 {
-	console.log("Activate");
+	//console.log("Activate");
 	this.active = true;
 	for(var e in this.editions)
 	{
@@ -93,7 +82,7 @@ Collection.prototype.Activate = function()
 
 Collection.prototype.Deactivate = function()
 {
-	console.log("Deactivate");
+	//console.log("Deactivate");
 	this.active = false;
 	for(var e in this.editions)
 	{
@@ -153,17 +142,17 @@ function Edition(_c, _e, _keys, _data, _emat)
 	}
 
 	//graphics
-	console.log(this.data.place);
+	//console.log(this.data.place);
 	this.place = this.data.place;
 	this.lt = 1.0;
 	this.lg = 1.0;
 	this.yearstart = 0;//this.data.year;
 	this.yearend = 0;
-	this.range = false;
+	this.mapped = false;
 	this.x = 50.0;
 	this.y = -25.0;
-	this.z = 41.0;
-	this.zz = 41.0;
+	this.z = 50.0;
+	this.zz = 50.0;
 
 	if(this.lt == 1.0 && this.lg == 1.0)
 	{
@@ -176,28 +165,54 @@ function Edition(_c, _e, _keys, _data, _emat)
 		}
 	}
 
-	console.log(this.data.date);
-
 	//temporal data //***allow for continuous remaping of year
 	if(this.data.year)
 	{
-			this.yearstart = parseInt(_data.year);
-			this.yearend = parseInt(_data.year);
-			this.z = Remap(this.yearstart, 1300.0, 1900.0, 0.0, 40.0);
+			this.yearstart = Math.abs(parseInt(this.data.year));
+			this.yearend = this.yearstart;
+			this.z = Remap(this.yearstart, time.start, time.end, 0.0, 40.0);
+
 			this.zz = this.z;
+
+			this.mapped = true;
 	}
-	else if(this.data.date)
+	else if(this.data.yearStart)
 	{	
-			if(this.data.date.yearStart) this.yearstart = parseInt(this.data.date.yearStart);
+			if(this.data.yearStart) this.yearstart = Math.abs(parseInt(this.data.yearStart));
 			else this.yearstart = 0;
-			if(this.data.date.yearEnd) this.yearend = parseInt(this.data.date.yearEnd)
+			if(this.data.yearEnd) 
+			{
+				var start = this.data.yearStart+"";
+				var end = this.data.yearEnd+"";
+
+				//console.log("end: "+end+"  end length: "+end.length);
+
+				if(end.length == 2)
+				{
+					if(start.length == 4)
+					{
+						var cent = start.slice(0,2);
+						//console.log("cent: "+cent);
+
+						var _end = end+"";
+						end = cent+_end;
+					}
+				}
+
+				this.yearend = Math.abs(parseInt(end));
+				this.data.yearEnd = this.yearend;
+			}
 			else this.yearend = this.yearstart;
 
-			console.log(this.yearstart + " " + this.yearend);
+			//console.log(this.yearstart + " " + this.yearend);
 
-			this.z = Remap(this.yearstart, 1300.0, 1900.0, 0.0, 40.0);
-			this.zz = Remap(this.yearend, 1300.0, 1900.0, 0.0, 40.0);
+			this.z = Remap(this.yearstart, time.start, time.end, 0.0, 40.0);
+			this.zz = Remap(this.yearend, time.start, time.end, 0.0, 40.0);
+
+			this.mapped = true;
 	}
+
+	if(this.yearstart != 0 && this.z > 40.0) console.log(this.z);
 
 	//geo line
 	this.v0 = vec3.create();
@@ -218,7 +233,11 @@ function Edition(_c, _e, _keys, _data, _emat)
 	this.emat = _emat;
 	this.currentmat = this.emat;
 	this.book = this.Model(); //new coGL.Model(coGL.stockMeshes.edition, this.x, this.y, this.z);
+	
+	if(!this.mapped) this.currentmat = unmat;
+
 	this.book.material = this.currentmat;
+
 	this.book.parent = this;
 	coGL.selectable(this.book);
 	modelsToSelect.push(this.book);
@@ -237,8 +256,8 @@ Edition.prototype.Model = function()
 		console.log("date range mesh");
 
 		
-		var _z = 10.0;//this.zz - this.z;
-		var m = 3.0 / _z;
+		var _z = this.zz - this.z;
+		var m = 0.4;
 
 		//what if the mesh needs to be dynamic?
 
@@ -279,7 +298,7 @@ Edition.prototype.Model = function()
 
     	mesh = new coGL.Mesh(VBO, IBO);
 
-    	console.log(mesh);
+    	//console.log(mesh);
 	}
 
 	//var mesh = coGL.stockMeshes.edition;
@@ -294,10 +313,10 @@ Edition.prototype.Zmap = function(_map)
 {
 	if(_map == true)
 	{
-		if(this.year != null) this.tz = Remap(this.year, 1300.0, 1900.0, 0.0, 40.0);
-		else this.tz = 41.0;
+		if(this.year != null) this.tz = Remap(this.year, time.start, time.end, 0.0, 40.0);
+		else this.tz = 50.0;
 	}
-	else this.tz = 41.0;
+	else this.tz = 50.0;
 }
 
 //update edition with geographic information - called from Collection.UpdateGeo
@@ -577,7 +596,7 @@ function Edition(_c, _e, _data, _emat, _smat)
 	if(_data.year)
 	{
 			this.year = parseInt(_data.year);
-			this.z = Remap(this.year, 1300.0, 1900.0, 0.0, 40.0);
+			this.z = Remap(this.year, time.start, 1900.0, 0.0, 40.0);
 	}
 	else if(_data.year == null) this.z = 41.0;
 	else this.z = 41.0;

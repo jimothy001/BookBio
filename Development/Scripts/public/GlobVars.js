@@ -9,6 +9,7 @@ var bgcol = [0.9,0.9,0.9,1];
 //SPACE
 var map;
 var mapmodels = [];
+var time = {"start": 1440, "end": 2015};
 var timemark;
 var tagmodels = [];
 var timemodels = [];
@@ -35,11 +36,22 @@ var geoinfo = []; //This should be checked with each new set of bibliographic re
 var geoquery = [];
 
 
+
+
 //remap
 function Remap(val, from1, to1, from2, to2)
 {
 	var result = (val - from1) / (to1 - from1) * (to2 - from2) + from2;
 	return result;
+}
+
+//gets geocodes for bib locations + called from collection instantiation
+function QueryGeo()
+{
+	console.log("QueryGeo length: " + geoquery.length);
+	var data = {queries: geoquery};
+	queueMsg('QueryGeo', data);
+	geoquery=[]; //empty the geoquery array
 }
 
 //add to geoquery que
