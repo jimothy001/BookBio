@@ -3,7 +3,9 @@ var coGL;
 var gl;
 var modelsToRender=[]; //models to render is a collection of things with a render funciton they could even represent arbitrary conditional group selectors
 var modelsToSelect=[];  //collection of models that are selectable
-var cameradistance = 50.0;
+var cameradistance = 100.0;
+var mindistance = 5.0;
+var maxdistance = 150.0;
 var bgcol = [0.9,0.9,0.9,1];
 
 //SPACE
@@ -14,6 +16,7 @@ var timemark;
 var tagmodels = [];
 var timemodels = [];
 var offset = 2.75; //for some reason this is necessary for mapping lg to x. I don't know why.
+
 
 //SOCKET
 var id; //user's id for receiving data from server
