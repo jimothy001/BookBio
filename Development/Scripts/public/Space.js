@@ -38,7 +38,7 @@ function Map() //GEOGRAPHY //need to replace w/ single quad w/ texture
 
 function TimeMark() //TIME DEMARCATION
 {
-	this.bounds = [1300, 2015];
+	//this.bounds = [time.start, time.end];
 	this.interval = 100;
 
 	this.mat = new coGL.Material(coGL.shaders.default, {"uColor":[0.97, 0.97, 0.97, 0.2]});
@@ -49,7 +49,7 @@ function TimeMark() //TIME DEMARCATION
 		var mark = new Mark(this.mat);
 		mark.tag = mark.Tag();
 		mark.Set(10.0 * i);
-
+		console.log(mark.z);
 
 		this.marks.push(mark);
 
@@ -57,7 +57,7 @@ function TimeMark() //TIME DEMARCATION
 		if(i > 0) timemodels.push(mark.model);
 	}
 
-	this.MapMarks(this.bounds[0], this.bounds[1]);
+	this.MapMarks(time.start, time.end);
 
 	return this;
 }
@@ -65,7 +65,7 @@ function TimeMark() //TIME DEMARCATION
 TimeMark.prototype.UpdateBounds = function()
 {
 	var start = 0;
-	var end = 2015;
+	var end = time.end;
 
 	for(var i in collections)
 	{
@@ -91,6 +91,7 @@ TimeMark.prototype.MapMarks = function(_from, _to)
 		var mark = this.marks[i];
 		var date = Remap(mark.z, 0.0, 40.0, _from, _to)
 		mark.date = Math.round(date);
+		mark.Set(mark.z);
 		//this.marks[i].date = date;
 	}
 }

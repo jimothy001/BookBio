@@ -52,8 +52,17 @@ COGL.MeshModule=function(_cogl) {
     }
 
     _cogl.Mesh=function(_vdata, _fdata) {
+        
+
         this.VBOdata=new Float32Array(_vdata);
         this.IBOdata=new Uint16Array(_fdata);
+
+       /* if(_vdata.length > 64)
+        { 
+            console.log("custom mesh");
+            console.log(this.VBOdata);
+            console.log(this.IBOdata);
+        }*/
 
         this.VBO=null;
         this.IBO=null;

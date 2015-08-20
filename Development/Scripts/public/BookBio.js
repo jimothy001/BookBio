@@ -1,20 +1,3 @@
-/*//GL
-var coGL;
-var gl;
-var modelsToRender=[]; //models to render is a collection of things with a render funciton they could even represent arbitrary conditional group selectors
-var modelsToSelect=[];  //collection of models that are selectable
-var cameradistance = 50.0;
-var bgcol = [0.9,0.9,0.9,1];
-
-//SOCKET
-var id; //user's id for receiving data from server
-var socket = io.connect(); //socket.io initialization and creation of the socket object at beginning of script
-	//the queue is used in order to queue events so that they don't fire rapidly but only at set intervals.
-	//this technique can be used for less critical events and they could bebatched and uploaded as a package to 
-	//avoid overwhelming the server
-var queue=[];//socket queue
-var query; //query geographic data*/
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //MAIN //RUNS ONCE ON PAGE LOAD
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -132,27 +115,31 @@ function Main()
 		{
 			if(currentselect != null)
 			{	
-				if(currentselect.active) currentselect.currentmat = currentselect.emat; //change current selections material back to original
+				if(currentselect.active && currentselect.mapped) currentselect.currentmat = currentselect.emat; //change current selections material back to original
 				else currentselect.currentmat = unmat;
 
 				currentselect.book.material = currentselect.currentmat; 
 			}
 			
 			currentselect = select;
-			if(currentselect.active) currentselect.currentmat = currentselect.emat; //change current selections material back to original
-			else currentselect.currentmat = selunmat;
-
-			currentselect.book.material = currentselect.currentmat;
 
 			var c = currentselect.c;
 			var collection = collections[c];
 			var keys = collections[c].keys;
 			currentselect.book.material = collection.smat; //set selection with selection material
 
+			if(currentselect.active) currentselect.currentmat = collection.smat; //change current selections material back to original
+			else currentselect.currentmat = selunmat;
+
+			currentselect.book.material = currentselect.currentmat;
+
+
 			var t = [select.x, select.y, select.z];
 			coGL.camera.setTargetPoint(t); //set camera target
 			
 			var data = currentselect.data;
+
+			console.log(currentselect);
 
 			for(var k in keys)
 			{
@@ -212,15 +199,6 @@ socket.on("welcome", function(_data)
 		console.log("this is my socket ID: " + id);
 });
 
-//gets geocodes for bib locations + called from collection instantiation
-function QueryGeo()
-{
-	console.log("QueryGeo length: " + geoquery.length);
-	var data = {queries: geoquery};
-	queueMsg('QueryGeo', data);
-	geoquery=[]; //empty the geoquery array
-}
-
 //updates collection with geo data
 socket.on("_QueryGeo", function(_data)
 {
@@ -233,7 +211,13 @@ socket.on("_QueryGeo", function(_data)
 });
 
 socket.on("SearchQueryResult", function(_data) {
-	var c = new Collection(name, data);
+	console.log('SearchQueryResult');
+
+	var name = _data.name;"WorldCatQuery"; //temp
+	var data = _data.data;
+	var keys = GetJSONKeysFromArray(_data.data);
+
+	var c = new Collection(name, data, keys);
 });
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

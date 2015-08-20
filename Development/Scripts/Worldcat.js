@@ -14,6 +14,7 @@ _this._getWCIndex = function(search) {
   case 'keyword':
     return base + 'kw';
   case 'title':
+    console.log("title");
     return base + 'ti';
   case 'author':
     return base + 'au';
@@ -132,6 +133,7 @@ _this._splitDate= function(date) {
     newDate['yearEnd']   = parseInt(dates[1], 10);
   } else {
     newDate['yearStart'] = parseInt(date, 10);
+    newDate['yearEnd'] = newDate.yearStart;
   }
   return newDate;
 }
@@ -180,7 +182,10 @@ _this._parse = function(data) {
           if (_this._findCode(itemData, 'c')) { 
             year = _this._findCode(itemData, 'c').value;
             year = _this._cleanup(year);
-            output.date = _this._splitDate(year);
+            var yearRange = _this._splitDate(year);
+            output.yearStart = yearRange.yearStart;
+            output.yearEnd = yearRange.yearEnd;
+            //output.date = _this._splitDate(year);
           }
         }
 
@@ -205,7 +210,7 @@ _this._parse = function(data) {
 module.exports =  {
 
   createNameFromQuery: function(query) {
-    var name = 'WorldCat Search: ';
+    var name = 'WorldCat Search - ';
     var fields = query['fields'];
     for (var field in fields) {
       if (fields[field] !== ''){
