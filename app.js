@@ -53,13 +53,15 @@ server.listen(process.env.PORT || 6789);
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+
 var mongo = require('mongodb'),
 	  MongoServer = mongo.Server,
 	  Db = mongo.Db,
-	  ObjectID = mongo.ObjectID;
+	  ObjectID = mongo.ObjectID,
+	  uri = process.env.MONGOLAB_URI || 'localhost';
 
 //.................open a connection to the mongodb server
-var mdbserver = new MongoServer('localhost', 27017, {auto_reconnect: true});
+var mdbserver = new MongoServer(uri, 27017, {auto_reconnect: true});
 //.................ask the server for the database named "DBASE" this databse will be created if it doesn't exist already
 var db = new Db('BBM', mdbserver,{safe:true});
 
