@@ -7,6 +7,7 @@
     "body-parser": "*",
     "connect": "*",
     "errorhandler": "*",
+    "express": "^4.13.3",
     "finalhandler": "*",
     "method-override": "*",
     "mongodb": "*",
