@@ -1,0 +1,25 @@
+{
+  "name": "intro",
+  "description": "intro app",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "body-parser": "*",
+    "connect": "*",
+    "errorhandler": "*",
+    "express": "^4.13.3",
+    "finalhandler": "*",
+    "method-override": "*",
+    "mongodb": "*",
+    "node-geocoder": "*",
+    "q": "^1.4.1",
+    "routes": "*",
+    "serve-static": "*",
+    "socket.io": "*",
+    "xlsx": "*",
+    "xml2js": "^0.4.10"
+  },
+  "scripts": {
+    "start": "node app.js"
+  }
+}
