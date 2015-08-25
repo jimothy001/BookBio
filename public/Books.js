@@ -24,17 +24,12 @@ function Collection(_name, _data, _keys)
 
 	var ci = collections.length; //this collection's index after it is added to collections array
 
-	console.log(this.keys);
-
 	for(var i in _data) //instantate editions and add them to collections
 	{
-		//console.log(_data[i]);
 
 		var e = new Edition(ci, i, this.keys, _data[i], this.emat);
 		this.editions.push(e);
 	}
-
-	console.log("editions count:" + this.editions.length);
 
 	if(geoquery.length > 0) QueryGeo(); //if there are queries for geographic information... query them.
 
@@ -149,8 +144,8 @@ function Edition(_c, _e, _keys, _data, _emat)
 	this.yearstart = 0;//this.data.year;
 	this.yearend = 0;
 	this.mapped = false;
-	this.x = 50.0;
-	this.y = -25.0;
+	this.x = 75.0;//50.0;
+	this.y = 0.0;//-25.0;
 	this.z = 50.0;
 	this.zz = 50.0;
 

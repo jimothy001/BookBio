@@ -29,10 +29,15 @@ _this._getWCIndex = function(search) {
   }
 }
 
-_this._constructRequest = function(data) {
+_this._isQuoted = function(field) //not sure if this is necessary
+{
+  var quotes = [];
+}
+
+_this._constructRequest = function(data, recordposition) {
   var fields         = data['fields'];
   var language       = data['language'];
-  var operator       = '+any+';
+  var operator       =  '+all+'//'+exact+'//'+any+'; //control precision from client side
   var conjugator     = '+and+';
   var queryBase      = 'http://www.worldcat.org/webservices/catalog/search/sru?query=';
   var searchString   = '';
@@ -40,12 +45,21 @@ _this._constructRequest = function(data) {
   var version        = '&version=1.1';
   var worldCatApiKey = '&operation=searchRetrieve&wskey=GwpUhR9ag9TLFAGLt6qTkPpIVCSetHrvnOvCY7FWE9pEbPztqmCjCFGWII8sbfpaGZ2CeLwGwXg7pHpC';
   var count          = '100';
-  var pagingOptions  = '&recordSchema=&maximumRecords=' + count + '&startRecord=1&recordPacking=xml&servicelevel=default&sortKeys=relevance&resultSetTTL=300&recordXPath=';
+  /*Maximum number of records/libraries –
+  For any query the maximum number of records or library locations that can be requested is 100. 
+  It is possible to send another query with the next start position and request the next set of records 
+  or library locations up to another 100.*/
+  //var pagingOptions  = '&recordSchema=&maximumRecords=' + count + '&startRecord=1&recordPacking=xml&servicelevel=default&sortKeys=relevance&resultSetTTL=300&recordXPath=';
+  var pagingOptions  = '&recordSchema=&maximumRecords=' + count + '&startRecord='+recordposition+'&recordPacking=xml&servicelevel=default&sortKeys=relevance&resultSetTTL=300&recordXPath=';
+
+
+  console.log("fields:");
 
   for (var key in fields) {
     if (fields[key] !== '') {
+      console.log("... "+ fields[key]);
       var wcIndex = _this._getWCIndex(key); 
-      var searchTerm = encodeURIComponent(' ' + fields[key] + ' ' );
+      var searchTerm = encodeURIComponent('"' + fields[key] + '"' ); //(' ' + fields[key] + ' ' );
       searchString += wcIndex + operator + searchTerm + conjugator;
     }
   }
@@ -196,7 +210,7 @@ _this._parse = function(data) {
         }
       }
       outputs.push(output);
-      console.log(output);
+      //console.log(output);//jy
     }
     deferred.resolve(outputs);
   });
@@ -220,9 +234,11 @@ module.exports =  {
     return name;
   },
 
-  search: function(query) {
+  search: function(query, searchposition) {
     var deferred = Q.defer();
-    var wcQuery = _this._constructRequest(query);
+    var wcQuery = _this._constructRequest(query, searchposition);
+
+    console.log("wcQuery: "+wcQuery);//jy
 
     _this._makeRequest(wcQuery).then(function (result) {
       _this._parse(result).then(function (finalOutput) {

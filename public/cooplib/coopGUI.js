@@ -1099,22 +1099,17 @@ CO.UITextInput.prototype.validate=function() {
 	}
 
 	if (this.onCommited)  {
-		//console.log("UITextInput.onCommited");
-		console.log("enteredvalue: "+enteredvalue);
+		
 		var result=this.onCommited(enteredvalue);
-		//console.log(this.onCommited);
-		console.log("result: "+result);
+		
 		if (result || result===undefined) {
-			console.log("1");
 			this.text=enteredvalue;
 			this.textInput.value=this.text;
 		}
-		else 
-			console.log("2");
-			this.textInput.value=this.text;
+		//else 
+			//this.textInput.value=this.text;
 	}
 	else {
-		console.log("! UITextInput.onCommited");
 		this.text=enteredvalue;
 	}
 

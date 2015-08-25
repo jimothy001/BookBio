@@ -110,7 +110,8 @@ UI.prototype.WorldCat = function()
 	trigger.setOnPressed(function(e)
 	{
 		var terms = this.parent.terms;
-		console.log(terms);
+		//console.log(terms);
+		console.log(terms.fields);//terms["fields"]["keyword"]);
 		queueMsg('SearchQueryInitiated', terms);
 	});
 
@@ -264,9 +265,7 @@ function GetJSONKeysFromWorksheet(_worksheet)
 
 function GetJSONKeysFromArray(_data) 
 {
-	console.log(_data);
-
-	//var keys = [];
+	//console.log(_data);
 
 	var keys = ExtractFirstKeys(_data[0]);
 	//keys.concat(firstkeys);

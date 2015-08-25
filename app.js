@@ -130,6 +130,12 @@ io.sockets.on('connection', function (socket) {
 
 	socket.user.socket=socket;	//assign the socket to hte user so that each user knows her connection conduit
 	
+	socket.user.address = socket.id;
+	socket.user.wcquery = {};
+	socket.user.wcquerydata = [];
+	socket.user.wcrecord = 1;
+	socket.user.geoqueries = [];
+
 	users[socket.user.id]=socket.user; //register the new user to the list of users
 
 	socket.broadcast.emit('userentered', { "id": socket.user.id });	//broadcast the new user is to all other users except the one that just connected
@@ -168,26 +174,90 @@ io.sockets.on('connection', function (socket) {
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	socket.on('SearchQueryInitiated', function(query)
 	{
 		console.log('SearchQueryInitiated');
 
-		if (query.length != 0){
-			Worldcat.search(query).then(function (data){
-				var name = Worldcat.createNameFromQuery(query);
-				var output = {
-					'name' : name,
-					'data' : data
-				}
-				socket.emit('SearchQueryResult', output);
-			});
-		} else {
+		if (query.length != 0)
+		{
+			var id = socket.user.id;
+
+			var q = {};
+
+			q.query = query;
+			q.data = [];
+			q.id = socket.id;
+			q.output = {};
+			q.position = 1;
+
+			wcqueries.push(q);
+
+			Search();
+		} 
+		else 
+		{
 			console.log('empty search dude');
 		}
 	});
 
 });
 
+var wcqueries = [];
+
+function Search()
+{
+	var query = wcqueries[0].query;
+	var position = wcqueries[0].position;
+
+	Worldcat.search(query, position).then(function (data)
+	{	
+		for(var i in data)
+		{
+			wcqueries[0].data.push(data[i]);
+		}
+
+		if(data.length > 99 && wcqueries[0].position < 900) 
+		{
+			wcqueries[0].position += 100;
+			Search();
+		}
+		else SearchResults();
+	});
+}
+
+function SearchResults()
+{
+	var name = Worldcat.createNameFromQuery(wcqueries[0].query);
+	var output = 
+	{
+		'name' : name,
+		'data' : wcqueries[0].data
+	}
+
+	wcqueries[0].output = output;
+
+	ResultsToClient();
+}
+
+//send results to client
+function ResultsToClient()
+{
+	var id = wcqueries[0].id;
+
+	if (io.sockets.connected[id]) //if client is connected
+	{
+		io.sockets.connected[id].emit('SearchQueryResult', wcqueries[0].output);
+	}
+	else console.log("can't send to client because client is not connected");
+
+	WCReset();
+}
+
+function WCReset()
+{
+	wcqueries.splice(0,1); //one down, x to go...
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //GEOGRAPHY
@@ -253,7 +323,7 @@ function GeoQuery()
 					//query OpenCage and add results to db //sometimes returns undefined for city
 					geocoder.geocode(geoqueries[0].place, function(err, res)
 					{ 
-						console.log("response from geocoder");
+						//console.log("response from geocoder");
 
 						if(!err) 
 						{
@@ -342,6 +412,26 @@ setInterval(GeoQuery, 50); //arbitrary rate of repetition
 /*
 
 //OLD SOCKET FUNCTIONS
+
+socket.on('SearchQueryInitiated', function(query)
+{
+	console.log('SearchQueryInitiated');
+
+	if (query.length != 0){
+		Worldcat.search(query).then(function (data){
+			var name = Worldcat.createNameFromQuery(query);
+			var output = {
+				'name' : name,
+				'data' : data
+			}
+			socket.emit('SearchQueryResult', output);
+			console.log(data);
+		});
+	} else {
+		console.log('empty search dude');
+	}
+});
+
 
 //feeds all DC data to client in one fell swoop
 socket.on('GetDC', function (_data)

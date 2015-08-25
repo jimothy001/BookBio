@@ -17,7 +17,7 @@ function Main()
 	//GL
 	coGL=COGL.init("canvas1");
 	gl=coGL.gl;
-	unmat = new coGL.Material(coGL.shaders.default, {"uColor":[0.9,0.9,0.9,0.05]});
+	unmat = new coGL.Material(coGL.shaders.default, {"uColor":[0.9,0.9,0.9,0.9]});
 	selunmat = new coGL.Material(coGL.shaders.default, {"uColor":[0.5,0.5,0.5,0.5]});
 
 	map = new Map();
@@ -175,8 +175,6 @@ function Main()
 				coGL.camera.setDistance(cameradistance);
 			}
 		}
-
-		//console.log(cameradistance);
 	});
 
 
