@@ -24,17 +24,12 @@ function Collection(_name, _data, _keys)
 
 	var ci = collections.length; //this collection's index after it is added to collections array
 
-	console.log(this.keys);
-
 	for(var i in _data) //instantate editions and add them to collections
 	{
-		//console.log(_data[i]);
 
 		var e = new Edition(ci, i, this.keys, _data[i], this.emat);
 		this.editions.push(e);
 	}
-
-	console.log("editions count:" + this.editions.length);
 
 	if(geoquery.length > 0) QueryGeo(); //if there are queries for geographic information... query them.
 
@@ -149,8 +144,8 @@ function Edition(_c, _e, _keys, _data, _emat)
 	this.yearstart = 0;//this.data.year;
 	this.yearend = 0;
 	this.mapped = false;
-	this.x = 50.0;
-	this.y = -25.0;
+	this.x = 80.0;//50.0;
+	this.y = 0.0;//-25.0;
 	this.z = 50.0;
 	this.zz = 50.0;
 
@@ -163,6 +158,7 @@ function Edition(_c, _e, _keys, _data, _emat)
 			
 			GeoQuery(query);
 		}
+		else this.NoGeo();
 	}
 
 	//temporal data //***allow for continuous remaping of year
@@ -176,40 +172,64 @@ function Edition(_c, _e, _keys, _data, _emat)
 
 			this.mapped = true;
 	}
-	else if(this.data.yearStart)
+	else if(this.data.yearStart && this.data.yearEnd)
 	{	
-			if(this.data.yearStart) this.yearstart = Math.abs(parseInt(this.data.yearStart));
-			else this.yearstart = 0;
-			if(this.data.yearEnd) 
+			if(this.data.yearStart === "!" || this.data.yearEnd === "!")
 			{
-				var start = this.data.yearStart+"";
-				var end = this.data.yearEnd+"";
-
-				//console.log("end: "+end+"  end length: "+end.length);
-
-				if(end.length == 2)
-				{
-					if(start.length == 4)
-					{
-						var cent = start.slice(0,2);
-						//console.log("cent: "+cent);
-
-						var _end = end+"";
-						end = cent+_end;
-					}
-				}
-
-				this.yearend = Math.abs(parseInt(end));
-				this.data.yearEnd = this.yearend;
+				console.log("!");
+				this.NoGeo();
 			}
-			else this.yearend = this.yearstart;
+			else 
+			{
+				this.yearstart = Math.abs(parseInt(this.data.yearStart)); //if(this.data.yearStart) 
+				this.yearend = Math.abs(parseInt(this.data.yearEnd)); //if(this.data.yearStart) 
 
-			//console.log(this.yearstart + " " + this.yearend);
+				
+				if(this.data.yearEnd) 
+				{
+					var start = this.data.yearStart+"";
+					var end = this.data.yearEnd+"";
 
-			this.z = Remap(this.yearstart, time.start, time.end, 0.0, 40.0);
-			this.zz = Remap(this.yearend, time.start, time.end, 0.0, 40.0);
+					//console.log("end: "+end+"  end length: "+end.length);
 
-			this.mapped = true;
+					if(end.length == 2)
+					{
+						if(start.length == 4)
+						{
+							var cent = start.slice(0,2);
+							//console.log("cent: "+cent);
+
+							var _end = end+"";
+							end = cent+_end;
+						}
+					}
+
+					this.yearend = Math.abs(parseInt(end));
+					this.data.yearEnd = this.yearend;
+				}
+				else this.yearend = this.yearstart;
+
+				if(this.yearstart > 1000 && this.yearend > 1000)
+				{
+					//console.log(this.yearstart + " " + this.yearend);
+
+					this.z = Remap(this.yearstart, time.start, time.end, 0.0, 40.0);
+					this.zz = Remap(this.yearend, time.start, time.end, 0.0, 40.0);
+
+					this.mapped = true;
+				}
+				else
+				{ 
+					console.log("!!: " + this.yearstart + " " + this.yearend);
+					this.NoGeo();
+				}
+			}
+			
+	}
+	else
+	{ 
+		console.log("!!!");
+		this.NoGeo();
 	}
 
 	if(this.yearstart != 0 && this.z > 40.0) console.log(this.z);
@@ -233,8 +253,8 @@ function Edition(_c, _e, _keys, _data, _emat)
 	this.emat = _emat;
 	this.currentmat = this.emat;
 	this.book = this.Model(); //new coGL.Model(coGL.stockMeshes.edition, this.x, this.y, this.z);
-	
-	if(!this.mapped) this.currentmat = unmat;
+
+	if(!this.active) this.currentmat = unmat;
 
 	this.book.material = this.currentmat;
 
@@ -252,10 +272,7 @@ Edition.prototype.Model = function()
 
 	if(this.yearstart == this.yearend) mesh = coGL.stockMeshes.edition;
 	else
-	{
-		console.log("date range mesh");
-
-		
+	{	
 		var _z = this.zz - this.z;
 		var m = 0.4;
 
@@ -297,15 +314,21 @@ Edition.prototype.Model = function()
 	    var IBO = [0,2,3,4,6,7,8,10,11,12,14,15,16,18,19,20,22,23,0,3,1,4,7,5,8,11,9,12,15,13,16,19,17,20,23,21];
 
     	mesh = new coGL.Mesh(VBO, IBO);
-
-    	//console.log(mesh);
 	}
-
-	//var mesh = coGL.stockMeshes.edition;
 
 	var model = new coGL.Model(mesh, this.x, this.y, this.z);
 
 	return model;
+}
+
+Edition.prototype.NoGeo = function()
+{
+	this.ty += (Math.random() - 0.5) * 2.0;
+	this.tx += (Math.random() - 0.5) * 2.0;
+	this.active = false;
+	this.emat = unmat;
+	this.currentmat = unmat;
+	if(this.book != null) this.book.material = this.currentmat;
 }
 
 //map year to z value
@@ -316,23 +339,31 @@ Edition.prototype.Zmap = function(_map)
 		if(this.year != null) this.tz = Remap(this.year, time.start, time.end, 0.0, 40.0);
 		else this.tz = 50.0;
 	}
-	else this.tz = 50.0;
+	else
+	{
+	 	this.tz = 50.0;
+	 	this.active = false;
+	}
 }
 
 //update edition with geographic information - called from Collection.UpdateGeo
 Edition.prototype.UpdateGeo = function(u)
 {
-	console.log("UpdateGeo");
+	if(this.active)
+	{
+		console.log("UpdateGeo");
 
-	this.lt = parseFloat(u.lt);
-	this.ty = Remap(this.lt, -90.0, 90.0, 24.319, -24.319);
+		this.lt = parseFloat(u.lt);
+		this.ty = Remap(this.lt, -90.0, 90.0, 24.319, -24.319);
 
-	this.lg = parseFloat(u.lg); 
-	this.tx = Remap(this.lg, -180.0, 180.0, 48.0015+offset, -48.0015+offset);
+		this.lg = parseFloat(u.lg); 
+		this.tx = Remap(this.lg, -180.0, 180.0, 48.0015+offset, -48.0015+offset);
 
-	this.city = u.city;
-	this.territory = u.territory;
-	this.country = u.country;
+		this.city = u.city;
+		this.territory = u.territory;
+		this.country = u.country;
+	}
+	else this.NoGeo();
 }
 
 //called every frame
@@ -359,274 +390,3 @@ Edition.prototype.update = function()
 		this.v1[1] = this.y;
 		this.v1[2] = this.z;
 }
-
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//OUTMODED
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/*
-
-function GetJSONFromWorkSheet(_worksheet)
-{
-	var data = {"fields": [], "editions": [];
-	data.editions.push([]);
-
-	var colcheck = 1;
-
-	for(var i in _worksheet)
-	{
-		//if(i[0] === '!') continue;
-		if(i.length < 3 && i[1] == '1')
-		{
-			//if(i[0] === '!') continue;
-			data.fields.push(_worksheet[i].v);
-		}
-		else
-		{
-			if(colcheck % (data.fields.length + 1) == 0)
-			{
-				var edition = [];
-				data.editions.push(edition);
-				colcheck = 1;
-			}
-			else
-			{
-				if(i[0] === '!') data.editions[j].push("parp");
-				//if(_worksheet[i].v == null) data.editions[j].push("parp");
-				else
-				{
-					var j = data.editions.length - 1;
-					var v = _worksheet[i].v;
-					data.editions[j].push(v);
-				}
-				colcheck++;
-			}
-		}
-	}
-	
-	return data;
-}
-
-//example of reading individual cells in a worksheet
-for(var i in worksheet)
-{
-	if(i[0] === '!') continue;
-	else if(i[1] == '1')
-	{
-		console.log(i + " :" + " " + i[0] + " " + worksheet[i].v);
-		console.log(i + " :" + " " + i[1] + " " + worksheet[i].v);
-	}
-	else break;
-	//var edition = {};
-}
-
-//selectivly filters collection content per UI input //***make this flexible
-Collection.prototype.Filter = function(_criteria)
-{
-	if(_criteria == "place")
-	{
-		for(var i in this.editions)
-		{
-			if(this.editions[i].place == "") this.editions[i].Zmap(false);
-			else this.editions[i].Zmap(true);
-		}
-	}
-	if(_criteria == "shelf")
-	{
-		for(var i in this.editions)
-		{
-			if(this.editions[i].shelf == "") this.editions[i].Zmap(false);
-			else this.editions[i].Zmap(true);
-		}
-	}
-	if(_criteria == "mat")
-	{
-		for(var i in this.editions)
-		{
-			//console.log(this.editions[i].mat);
-			if(this.editions[i].bmat == "") this.editions[i].Zmap(false);
-			else this.editions[i].Zmap(true);
-		}
-	}
-	if(_criteria == "format")
-	{
-		for(var i in this.editions)
-		{
-			if(this.editions[i].format == "") this.editions[i].Zmap(false);
-			else this.editions[i].Zmap(true);
-		}
-	}
-	if(_criteria == "folios")
-	{
-		for(var i in this.editions)
-		{
-			if(this.editions[i].folios == "") this.editions[i].Zmap(false);
-			else this.editions[i].Zmap(true);
-		}
-	}
-	if(_criteria == "year")
-	{
-		for(var i in this.editions)
-		{
-			if(this.editions[i].year == null) this.editions[i].Zmap(false);
-			else this.editions[i].Zmap(true);
-		}
-	}
-	if(_criteria == "lang")
-	{
-		for(var i in this.editions)
-		{
-			if(this.editions[i].lang == "") this.editions[i].Zmap(false);
-			else this.editions[i].Zmap(true);
-		}
-	}
-	if(_criteria == "vacc")
-	{
-		for(var i in this.editions)
-		{
-			if(this.editions[i].vacc == 0) this.editions[i].Zmap(false);
-			else this.editions[i].Zmap(true);
-		}
-	}
-	if(_criteria == "vis")
-	{
-		for(var i in this.editions)
-		{
-			if(this.editions[i].vacc == 0) this.editions[i].Zmap(false);
-			else this.editions[i].Zmap(true);
-		}
-	}
-	if(_criteria == "ill")
-	{
-		for(var i in this.editions)
-		{
-			if(this.editions[i].ill == "") this.editions[i].Zmap(false);
-			else this.editions[i].Zmap(true);
-		}
-	}
-	if(_criteria == "ref")
-	{
-		for(var i in this.editions)
-		{
-			if(this.editions[i].ref == "") this.editions[i].Zmap(false);
-			else this.editions[i].Zmap(true);
-		}
-	}
-	if(_criteria == "note")
-	{
-		for(var i in this.editions)
-		{
-			if(this.editions[i].note == "") this.editions[i].Zmap(false);
-			else this.editions[i].Zmap(true);
-		}
-	}
-}
-
-function Edition(_c, _e, _data, _emat, _smat)
-{
-	//knows its place in the world
-	this.c = _c; //collection index
-	this.e = _e; //edition index
-	
-	//text info
-	this.edition = 0;
-	this.place = "";
-	this.shelf = "";
-	this.bmat = "";
-	this.format = "";
-	this.folios = 0;
-	this.period = "";
-	this.lang = "";
-	this.vacc = 0;
-	this.vis = 0;
-	this.ill = "";
-	this.ref = "";
-	this.note = "";
-
-	if(_data.edition) this.edition = _data.edition;
-	if(_data.place) this.place = _data.place;
-	if(_data.shelf) this.shelf = _data.shelf;
-	if(_data.mat) this.bmat = _data.mat;
-	if(_data.format) this.format = _data.format;
-	if(_data.folios) this.folios = _data.folios;
-	if(_data.period) this.period = _data.period;
-	if(_data.lang) this.lang = _data.lang;
-	if(_data.vacc) this.vacc = _data.vacc;
-	if(_data.vis) this.vis = _data.vis;
-	if(_data.ill) this.ill = _data.ill;
-	if(_data.ref) this.ref = _data.ref;
-	if(_data.note) this.note = _data.note;
-
-	//graphics
-	this.lt = 1.0;
-	this.lg = 1.0;
-	this.x = 50.0;
-	this.y = -25.0;
-
-	//geographic data
-	if(_data.lg && _data.lt) //if lt/lg already exists
-	{
-		this.lg = parseFloat(_data.lg); 
-		this.x = Remap(this.lg, -180.0, 180.0, 48.0015+offset, -48.0015+offset);
-
-		this.lt = parseFloat(_data.lt);
-		this.y = Remap(this.lt, -90.0, 90.0, 24.319, -24.319);
-	}
-	else //if not, query if from server
-	{
-		if(this.place != "")
-		{
-			var address = [{c: this.c, e: this.e}]; //nested addresses
-			var query = {addresses: address, place: this.place};
-			
-			GeoQuery(query);
-		}
-		else console.log("this.place is empty: " + this.place);
-	}
-
-	//temporal data //***allow for continuous remaping of year
-	if(_data.year)
-	{
-			this.year = parseInt(_data.year);
-			this.z = Remap(this.year, time.start, 1900.0, 0.0, 40.0);
-	}
-	else if(_data.year == null) this.z = 41.0;
-	else this.z = 41.0;
-
-	//geo line
-	this.v0 = vec3.create();
-	this.v0[0] = this.x;
-	this.v0[1] = this.y;
-	this.v0[2] = 0.0;
-	this.v1 = vec3.create();
-	this.v1[0] = this.x;
-	this.v1[1] = this.y;
-	this.v1[2] = 40.0;
-
-	//book mesh
-	this.easein = 0.95;
-	this.tx = this.x;
-	this.ty = this.y;
-	this.tz = this.z;
-
-	this.emat = _emat;
-	this.smat = _smat;
-	this.book = new coGL.Model(coGL.stockMeshes.edition, this.x, this.y, this.z);
-	this.book.material = this.emat;
-	this.book.parent = this;
-	coGL.selectable(this.book);
-	modelsToSelect.push(this.book);
-	modelsToRender.push(this.book);
-	this.book.onMouseLeave = function() {select = null}; //not going to be clicked :(
-	this.book.onMouseEnter = function() {select = this.parent;}; //I might be clicked :)
-}
-
-*/

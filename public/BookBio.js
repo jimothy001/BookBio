@@ -17,7 +17,7 @@ function Main()
 	//GL
 	coGL=COGL.init("canvas1");
 	gl=coGL.gl;
-	unmat = new coGL.Material(coGL.shaders.default, {"uColor":[0.9,0.9,0.9,0.05]});
+	unmat = new coGL.Material(coGL.shaders.default, {"uColor":[0.9,0.9,0.9,0.9]});
 	selunmat = new coGL.Material(coGL.shaders.default, {"uColor":[0.5,0.5,0.5,0.5]});
 
 	map = new Map();
@@ -175,8 +175,6 @@ function Main()
 				coGL.camera.setDistance(cameradistance);
 			}
 		}
-
-		//console.log(cameradistance);
 	});
 
 
@@ -205,12 +203,18 @@ socket.on("welcome", function(_data)
 //updates collection with geo data
 socket.on("_QueryGeo", function(_data)
 {
-	if(!_data.err)
+	var r = _data;
+	GeoResponse(r);
+
+	/*if(!_data.err)
 	{
 		var r = _data;
 		GeoResponse(r);
 	}
-	else console.log("server error: " + _data.err);
+	else 
+	{
+		console.log("server error: " + _data.err);
+	}*/
 });
 
 socket.on("SearchQueryResult", function(_data) {
@@ -296,111 +300,4 @@ setInterval(tick, 20);
 		geomesh.material = geomat;
 		modelsToRender.push(geomesh);
 	});
-*/
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//OUTMODED
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/*
-
-canvas1.addEventListener("mousedown", function(e) 
-{
-	//focus on item: set camera target and set UI values
-	if (select != null) //(e.which==1 && coGL.mouseOverObject) 
-	{
-		if(currentselect != null) currentselect.book.material = currentselect.emat; //change current selections material back to original
-		currentselect = select; 
-		currentselect.book.material = select.smat; //set selection with selection material
-
-		var t = [select.x, select.y, select.z];
-		coGL.camera.setTargetPoint(t); //set camera target
-
-		console.log(currentselect.smat);
-
-		//ui fields //MAKE FLEXIBLE
-		ui.citybutton.setLabel("place: " + select.place);
-		ui.shelfbutton.setLabel("shelf: " + select.shelf);
-		ui.matbutton.setLabel("material: " + select.bmat);
-		ui.formatbutton.setLabel("format: " + select.format);
-		ui.foliosbutton.setLabel("folios: " + select.folios);
-		ui.periodbutton.setLabel("period: " + select.period);
-		ui.yearbutton.setLabel("year: " + select.year);
-		ui.langbutton.setLabel("language: " + select.lang);
-		ui.vaccbutton.setLabel("verbal accretions: " + select.vacc);
-		ui.visbutton.setLabel("visuals: " + select.vis);
-		ui.illbutton.setLabel("illustrator: " + select.ill);
-		ui.refbutton.setLabel("reference: " + select.ref);
-		ui.notebutton.setLabel("note: " + select.note); //FIND A WAY FOR PEOPLE TO ADD NOTES
-	}
-});
-
-	coGL.addRenderingPass("final"). 
-	clearColorV(bgcol).
-	clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT).
-	camera().
-	light(light). //try doing without this
-	renderModels(modelsToRender).
-	execute(function() 
-	{
-		var plane=new coGL.Plane(coGL.mouse.point3d, coGL.mouse.normal); //could come in handy for selection of geographic features
-		plane.getMatrix(cubemodel.modelmatrix);
-
-		if (coGL.mouse.isOnBackground) 
-		{
-			cubemodel.moveTo([0,0,0]);
-		}
-	}).
-	activate();
-
-socket.on("welcome", function(_data)
-{
-		id = _data.id; //consistent with client id on server - seems useful for annotation system?
-		console.log("this is my socket ID: " + id);
-
-		var data = {};
-		queueMsg('GetDC', data); //temporary
-});
-
-socket.on("_GetDC", function(_data)
-{
-	var data = _data;
-	var c = new Collection(data.name, data.collection);
-});
-
-function QueryGeo(_query)
-{
-	console.log("QueryGeo");
-	var data = {query: _query};
-	queueMsg('QueryGeo', data);
-}
-
-socket.on("_QueryGeo", function(_data)
-{
-	var data = _data;
-	console.log("_QueryGeo");
-	console.log(data);
-});
-
-function QueryGeoDB(_query)
-{
-	console.log("QueryGeoDB");
-	var data = {query: _query};
-	queueMsg('QueryGeoDB', data);
-}
-
-socket.on("_QueryGeoDB", function(_data)
-{
-	var data = _data;
-	console.log("_QueryGeoDB");
-	console.log(data);
-});
-
 */

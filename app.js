@@ -130,6 +130,12 @@ io.sockets.on('connection', function (socket) {
 
 	socket.user.socket=socket;	//assign the socket to hte user so that each user knows her connection conduit
 	
+	socket.user.address = socket.id;
+	socket.user.wcquery = {};
+	socket.user.wcquerydata = [];
+	socket.user.wcrecord = 1;
+	socket.user.geoqueries = [];
+
 	users[socket.user.id]=socket.user; //register the new user to the list of users
 
 	socket.broadcast.emit('userentered', { "id": socket.user.id });	//broadcast the new user is to all other users except the one that just connected
@@ -138,6 +144,8 @@ io.sockets.on('connection', function (socket) {
 	//this event is automatically fired when a user dsconnects
 	socket.on('disconnect', function () {
 	  socket.broadcast.emit('userleft', {"id":socket.user.id});	//notify all other users that this socket's user left
+	  badids.push(socket.id);
+
 	  delete users[socket.user.id];    //delete the user from the list
 	});
 
@@ -168,26 +176,90 @@ io.sockets.on('connection', function (socket) {
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	socket.on('SearchQueryInitiated', function(query)
 	{
 		console.log('SearchQueryInitiated');
 
-		if (query.length != 0){
-			Worldcat.search(query).then(function (data){
-				var name = Worldcat.createNameFromQuery(query);
-				var output = {
-					'name' : name,
-					'data' : data
-				}
-				socket.emit('SearchQueryResult', output);
-			});
-		} else {
+		if (query.length != 0)
+		{
+			var id = socket.user.id;
+
+			var q = {};
+
+			q.query = query;
+			q.data = [];
+			q.id = socket.id;
+			q.output = {};
+			q.position = 1;
+
+			wcqueries.push(q);
+
+			Search();
+		} 
+		else 
+		{
 			console.log('empty search dude');
 		}
 	});
 
 });
 
+var wcqueries = [];
+
+function Search()
+{
+	var query = wcqueries[0].query;
+	var position = wcqueries[0].position;
+
+	Worldcat.search(query, position).then(function (data)
+	{	
+		for(var i in data)
+		{
+			wcqueries[0].data.push(data[i]);
+		}
+
+		if(data.length > 99 && wcqueries[0].position < 100) 
+		{
+			wcqueries[0].position += 100;
+			Search();
+		}
+		else SearchResults();
+	});
+}
+
+function SearchResults()
+{
+	var name = Worldcat.createNameFromQuery(wcqueries[0].query);
+	var output = 
+	{
+		'name' : name,
+		'data' : wcqueries[0].data
+	}
+
+	wcqueries[0].output = output;
+
+	ResultsToClient();
+}
+
+//send results to client
+function ResultsToClient()
+{
+	var id = wcqueries[0].id;
+
+	if (io.sockets.connected[id]) //if client is connected
+	{
+		io.sockets.connected[id].emit('SearchQueryResult', wcqueries[0].output);
+	}
+	else console.log("can't send to client because client is not connected");
+
+	WCReset();
+}
+
+function WCReset()
+{
+	wcqueries.splice(0,1); //one down, x to go...
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //GEOGRAPHY
@@ -202,12 +274,35 @@ io.sockets.on('connection', function (socket) {
 
 var geoquery = true; //timing device for checking DB, not sure if this is necessary
 var geoqueries = []; //queries from users, check to see if they are already in DB
+var badids = [];
 
 //for timing asynchronous db and geocoder operations
 function GeoReset()
 {
 	geoqueries.splice(0,1); //one down, x to go...
 	geoquery = true; //ready to check db again
+	if(geoqueries.length < 2) console.log("geoqueries is almost empty");
+}
+
+function GeoClean(id)
+{
+		for(var i in geoqueries)
+		{
+			/*for(var j in badids)
+			{
+				if(geoqueries)
+			}*/
+
+			if(geoqueries[i].id == id)
+			{ 
+				
+				if(geoqueries.length > 1) geoqueries.splice(i, i+1);
+				//else GeoReset();
+			}
+		}
+
+	geoquery = true;
+	console.log("GeoClean: " + geoqueries.length);
 }
 
 //send results to client
@@ -217,7 +312,11 @@ function GeoToClient(id, data)
 	{
 		io.sockets.connected[id].emit('_QueryGeo', data); 
 	}
-	else console.log("can't send to client because client is not connected");
+	else
+	{ 
+		GeoClean(id);
+		console.log("can't send to client because client is not connected");
+	}
 
 	GeoReset();
 }
@@ -250,75 +349,88 @@ function GeoQuery()
 				}
 				else //if searchterm is not in db
 				{
-					//query OpenCage and add results to db //sometimes returns undefined for city
-					geocoder.geocode(geoqueries[0].place, function(err, res)
-					{ 
-						console.log("response from geocoder");
+					//geoquery = true; //this really speeds things up but I'm not sure how well it works with multiple clients 
 
-						if(!err) 
-						{
-							//if there are matches found
-							if(res.length > 0)
+					if(geoqueries.length > 0 && geoqueries[0].place && geoqueries[0].place != "" && geoqueries[0].place != null)
+					{
+						var gq = geoqueries[0];
+
+						//query OpenCage and add results to db //sometimes returns undefined for city
+						geocoder.geocode(gq.place, function(err, res)
+						{ 
+							//console.log("response from geocoder");
+
+							if(!err) 
 							{
-								var nocity = true;
-
-								//run through until you can...
-								for(var i in res)
+								//if there are matches found
+								if(res.length > 0)
 								{
-									//...make sure that you're giving a city and not just a region //***Continue to work with how this is defined.
-									//e.g.: Cape Town SA vs. Cape Town USA
-									if(res[i].city || res[i].state)
+									var nocity = true;
+
+									//run through until you can...
+									for(var i in res)
 									{
-										data.searchterm = geoqueries[0].place;
-										data.city = res[0].city;
-										data.territory = res[0].state;
-										data.country = res[0].country;
-										data.lt = res[0].latitude;
-										data.lg = res[0].longitude;
+										//...make sure that you're giving a city and not just a region //***Continue to work with how this is defined.
+										//e.g.: Cape Town SA vs. Cape Town USA
+										//if(res[i].city || res[i].state)
+										//{
+											data.searchterm = gq.place;
+											data.city = res[0].city;
+											data.territory = res[0].state;
+											data.country = res[0].country;
+											data.lt = res[0].latitude;
+											data.lg = res[0].longitude;
 
-										//inserts data if there is no existing item that matches query, otherwise just updates it
-										var dbquery = {searchterm: geoqueries[0].place, city: data.city, territory: data.territory, country: data.country};
-										GEO.update 
-										(
-											dbquery,
-											data,
-											{upsert: true}, 
-											function(err, result) 
-											{				
-												if (!err) console.log("updated / inserted " + data.city + " to DB");
-											}
-										);
+											//inserts data if there is no existing item that matches query, otherwise just updates it
+											var dbquery = {searchterm: gq.place, city: data.city, territory: data.territory, country: data.country};
+											GEO.update 
+											(
+												dbquery,
+												data,
+												{upsert: true}, 
+												function(err, result) 
+												{				
+													if (!err) console.log("updated / inserted " + data.city + " to DB");
+												}
+											);
 
-										data.addresses = geoqueries[0].addresses; //client's collection / edition addresses
+											data.addresses = gq.addresses; //client's collection / edition addresses
 
-										GeoToClient(id, data); //send results to client
+											GeoToClient(id, data); //send results to client
 
-										nocity = false;
-										break;
+											nocity = false;
+											break;
+										//}
 									}
-								}
 
-								if(nocity == true) GeoReset(); //***Develop a client response for no cities in OpenCage associated with search term
+									if(nocity == true) GeoReset(); //***Develop a client response for no cities in OpenCage associated with search term
+								}
+								else //if there are no geocodes associated with search term
+								{
+									var err = "OpenCage has no geocodes for" + gq.place + ". Sorry. :(";
+									data.addresses = gq.addresses;
+									data.err = err;
+									GeoToClient(id, data); //send results to client
+								}
 							}
-							else //if there are no geocodes associated with search term
+							else //if OpenCage has an error
 							{
-								var err = "OpenCage has no geocodes for " + geoqueries[0].place + ". Sorry. :(";
-								data.err = err;
+								console.log("open cage error: " + err + " place: " + gq.place);
+								data.err = err; //read errors on client side
 								GeoToClient(id, data); //send results to client
 							}
-						}
-						else //if OpenCage has an error
-						{
-							console.log(err);
-							data.err = err; //read errors on client side
-							GeoToClient(id, data); //send results to client
-						}
-					});
+						});
+					}
+					else
+					{ 
+						console.log("something is wrong with place");
+						GeoReset();
+					}
 				}
 		   	}
 	    	else //if MongoDB has an error
 	    	{	
-	    		console.log(err);
+	    		console.log("mongo error: " + err);
 	    		data.err = err; //read errors on client side
 	    		GeoToClient(id, data); //send results to client
 	    	}
@@ -341,116 +453,26 @@ setInterval(GeoQuery, 50); //arbitrary rate of repetition
 
 /*
 
-//OLD SOCKET FUNCTIONS
 
-//feeds all DC data to client in one fell swoop
-socket.on('GetDC', function (_data)
+socket.on('SearchQueryInitiated', function(query)
 {
-	var data = {name: "DC", collection: DC};
-	socket.emit('_GetDC', data);
-});
+	console.log('SearchQueryInitiated');
 
-//queries db based on typed query term from client - you have to wait for a response
-socket.on('TestQueryGeoDB', function(_data)
-{
-	var query = _data.query + "";
-	console.log(query);
-	
-	GEO.find({city: query}).toArray(function(err, docs) //can give multiple results
-	{
-		var data = {};
-		if(!err)
-		{
-			if(docs.length > 0)
-			{
-				data.res = docs[0];
+	if (query.length != 0){
+		Worldcat.search(query).then(function (data){
+			var name = Worldcat.createNameFromQuery(query);
+			var output = {
+				'name' : name,
+				'data' : data
 			}
-			else
-    		{
-    			data.res = "not in db";
-    		}
-    	}
-    	else
-    	{
-    		console.log(err);
-    		data.res = err;
-    	}
-    	socket.emit('_QueryGeoDB', data);
-
-    	console.log("live long"); //and prosper live long
-	});
-		console.log("and prosper"); //continues to execute code while it waits for mongo to respond....
-});
-
-//queries geo coder based on typed search term from client - you REALLY have to wait for a response and can only place one query at a time
-socket.on('TestQueryGeo', function(_data)
-{
-	var query = _data.query + "";
-	console.log(query);
-
-	//Consider querying OpenCage from client side (exposed API key, unfortunately) if daily limit applies to
-	//IP Addresses rather than all queries that share the same API key.
-	geocoder.geocode(query, function(err, res)//should add to a queue
-	{
-		var data = {geo: res[0]};
-		socket.emit('_TestQueryGeo', data);
-	});
-});
-
-//END OLD SOCKET FUNCTIONS
-
-
-
-var __DC = require('./DC.js');
-var _DC = __DC.getDC();
-var DC;
-
-
-function PopulateDC(_DC) //called from db.createCollection
-{
-	SortDC(_DC);
-
-	var dc = [];
-
-	for(var i in _DC) //skeleton of WoN data to be given to the client up front
-	{
-		_DC[i].edition = i+1; //give "edition" or item number for structure //temp stop gap
-
-		var _dc = {edition: _DC[i].edition, 
-			year:_DC[i].year, 
-			city:_DC[i].city,
-			territory:"",
-			country:"",
-			shelf:_DC[i].shelf,
-			mat:_DC[i].mat,
-			format:_DC[i].format,
-			folios:_DC[i].folios,
-			period: _DC[i].period,
-			lt:_DC[i].lt, 
-			lg:_DC[i].lg, 
-			lang:_DC[i].lang,
-			vacc:_DC[i].vacc,
-			vis:_DC[i].vis,
-			ill:_DC[i].ill,
-			ref:_DC[i].ref,
-			note:_DC[i].note
-		};
-
-		dc.push(_dc);
+			socket.emit('SearchQueryResult', output);
+			console.log(data);
+		});
+	} else {
+		console.log('empty search dude');
 	}
+});
 
-	return dc;
-}
 
-function SortDC(__DC)
-{
-	__DC.sort(function(a,b){
-		if(a.year > b.year){
-			return 1;
-		}else if (a.year < b.year){
-			return -1;
-		}
-		return 0;
-	});
-}
+
 */
