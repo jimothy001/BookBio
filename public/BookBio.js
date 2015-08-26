@@ -203,12 +203,18 @@ socket.on("welcome", function(_data)
 //updates collection with geo data
 socket.on("_QueryGeo", function(_data)
 {
-	if(!_data.err)
+	var r = _data;
+	GeoResponse(r);
+
+	/*if(!_data.err)
 	{
 		var r = _data;
 		GeoResponse(r);
 	}
-	else console.log("server error: " + _data.err);
+	else 
+	{
+		console.log("server error: " + _data.err);
+	}*/
 });
 
 socket.on("SearchQueryResult", function(_data) {

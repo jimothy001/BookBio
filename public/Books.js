@@ -144,7 +144,7 @@ function Edition(_c, _e, _keys, _data, _emat)
 	this.yearstart = 0;//this.data.year;
 	this.yearend = 0;
 	this.mapped = false;
-	this.x = 75.0;//50.0;
+	this.x = 80.0;//50.0;
 	this.y = 0.0;//-25.0;
 	this.z = 50.0;
 	this.zz = 50.0;
@@ -158,6 +158,7 @@ function Edition(_c, _e, _keys, _data, _emat)
 			
 			GeoQuery(query);
 		}
+		else this.NoGeo();
 	}
 
 	//temporal data //***allow for continuous remaping of year
@@ -171,40 +172,64 @@ function Edition(_c, _e, _keys, _data, _emat)
 
 			this.mapped = true;
 	}
-	else if(this.data.yearStart)
+	else if(this.data.yearStart && this.data.yearEnd)
 	{	
-			if(this.data.yearStart) this.yearstart = Math.abs(parseInt(this.data.yearStart));
-			else this.yearstart = 0;
-			if(this.data.yearEnd) 
+			if(this.data.yearStart === "!" || this.data.yearEnd === "!")
 			{
-				var start = this.data.yearStart+"";
-				var end = this.data.yearEnd+"";
-
-				//console.log("end: "+end+"  end length: "+end.length);
-
-				if(end.length == 2)
-				{
-					if(start.length == 4)
-					{
-						var cent = start.slice(0,2);
-						//console.log("cent: "+cent);
-
-						var _end = end+"";
-						end = cent+_end;
-					}
-				}
-
-				this.yearend = Math.abs(parseInt(end));
-				this.data.yearEnd = this.yearend;
+				console.log("!");
+				this.NoGeo();
 			}
-			else this.yearend = this.yearstart;
+			else 
+			{
+				this.yearstart = Math.abs(parseInt(this.data.yearStart)); //if(this.data.yearStart) 
+				this.yearend = Math.abs(parseInt(this.data.yearEnd)); //if(this.data.yearStart) 
 
-			//console.log(this.yearstart + " " + this.yearend);
+				
+				if(this.data.yearEnd) 
+				{
+					var start = this.data.yearStart+"";
+					var end = this.data.yearEnd+"";
 
-			this.z = Remap(this.yearstart, time.start, time.end, 0.0, 40.0);
-			this.zz = Remap(this.yearend, time.start, time.end, 0.0, 40.0);
+					//console.log("end: "+end+"  end length: "+end.length);
 
-			this.mapped = true;
+					if(end.length == 2)
+					{
+						if(start.length == 4)
+						{
+							var cent = start.slice(0,2);
+							//console.log("cent: "+cent);
+
+							var _end = end+"";
+							end = cent+_end;
+						}
+					}
+
+					this.yearend = Math.abs(parseInt(end));
+					this.data.yearEnd = this.yearend;
+				}
+				else this.yearend = this.yearstart;
+
+				if(this.yearstart > 1000 && this.yearend > 1000)
+				{
+					//console.log(this.yearstart + " " + this.yearend);
+
+					this.z = Remap(this.yearstart, time.start, time.end, 0.0, 40.0);
+					this.zz = Remap(this.yearend, time.start, time.end, 0.0, 40.0);
+
+					this.mapped = true;
+				}
+				else
+				{ 
+					console.log("!!: " + this.yearstart + " " + this.yearend);
+					this.NoGeo();
+				}
+			}
+			
+	}
+	else
+	{ 
+		console.log("!!!");
+		this.NoGeo();
 	}
 
 	if(this.yearstart != 0 && this.z > 40.0) console.log(this.z);
@@ -228,10 +253,14 @@ function Edition(_c, _e, _keys, _data, _emat)
 	this.emat = _emat;
 	this.currentmat = this.emat;
 	this.book = this.Model(); //new coGL.Model(coGL.stockMeshes.edition, this.x, this.y, this.z);
-	
-	if(!this.mapped) this.currentmat = unmat;
 
-	this.book.material = this.currentmat;
+
+	if(this.active) this.book.material = this.currentmat;
+	else
+	{
+		this.currentmat = unmat;
+		this.book.material = this.currentmat;
+	}
 
 	this.book.parent = this;
 	coGL.selectable(this.book);
@@ -247,10 +276,7 @@ Edition.prototype.Model = function()
 
 	if(this.yearstart == this.yearend) mesh = coGL.stockMeshes.edition;
 	else
-	{
-		console.log("date range mesh");
-
-		
+	{	
 		var _z = this.zz - this.z;
 		var m = 0.4;
 
@@ -292,15 +318,21 @@ Edition.prototype.Model = function()
 	    var IBO = [0,2,3,4,6,7,8,10,11,12,14,15,16,18,19,20,22,23,0,3,1,4,7,5,8,11,9,12,15,13,16,19,17,20,23,21];
 
     	mesh = new coGL.Mesh(VBO, IBO);
-
-    	//console.log(mesh);
 	}
-
-	//var mesh = coGL.stockMeshes.edition;
 
 	var model = new coGL.Model(mesh, this.x, this.y, this.z);
 
 	return model;
+}
+
+Edition.prototype.NoGeo = function()
+{
+	this.ty += (Math.random() - 0.5) * 2.0;
+	this.tx += (Math.random() - 0.5) * 2.0;
+	this.active = false;
+	this.emat = unmat;
+	this.currentmat = unmat;
+	if(this.book != null) this.book.material = this.currentmat;
 }
 
 //map year to z value
@@ -311,23 +343,31 @@ Edition.prototype.Zmap = function(_map)
 		if(this.year != null) this.tz = Remap(this.year, time.start, time.end, 0.0, 40.0);
 		else this.tz = 50.0;
 	}
-	else this.tz = 50.0;
+	else
+	{
+	 	this.tz = 50.0;
+	 	this.active = false;
+	}
 }
 
 //update edition with geographic information - called from Collection.UpdateGeo
 Edition.prototype.UpdateGeo = function(u)
 {
-	console.log("UpdateGeo");
+	if(this.active)
+	{
+		console.log("UpdateGeo");
 
-	this.lt = parseFloat(u.lt);
-	this.ty = Remap(this.lt, -90.0, 90.0, 24.319, -24.319);
+		this.lt = parseFloat(u.lt);
+		this.ty = Remap(this.lt, -90.0, 90.0, 24.319, -24.319);
 
-	this.lg = parseFloat(u.lg); 
-	this.tx = Remap(this.lg, -180.0, 180.0, 48.0015+offset, -48.0015+offset);
+		this.lg = parseFloat(u.lg); 
+		this.tx = Remap(this.lg, -180.0, 180.0, 48.0015+offset, -48.0015+offset);
 
-	this.city = u.city;
-	this.territory = u.territory;
-	this.country = u.country;
+		this.city = u.city;
+		this.territory = u.territory;
+		this.country = u.country;
+	}
+	else this.NoGeo();
 }
 
 //called every frame

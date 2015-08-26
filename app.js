@@ -144,6 +144,8 @@ io.sockets.on('connection', function (socket) {
 	//this event is automatically fired when a user dsconnects
 	socket.on('disconnect', function () {
 	  socket.broadcast.emit('userleft', {"id":socket.user.id});	//notify all other users that this socket's user left
+	  badids.push(socket.id);
+
 	  delete users[socket.user.id];    //delete the user from the list
 	});
 
@@ -217,7 +219,7 @@ function Search()
 			wcqueries[0].data.push(data[i]);
 		}
 
-		if(data.length > 99 && wcqueries[0].position < 900) 
+		if(data.length > 99 && wcqueries[0].position < 100) 
 		{
 			wcqueries[0].position += 100;
 			Search();
@@ -272,12 +274,35 @@ function WCReset()
 
 var geoquery = true; //timing device for checking DB, not sure if this is necessary
 var geoqueries = []; //queries from users, check to see if they are already in DB
+var badids = [];
 
 //for timing asynchronous db and geocoder operations
 function GeoReset()
 {
 	geoqueries.splice(0,1); //one down, x to go...
 	geoquery = true; //ready to check db again
+	if(geoqueries.length < 2) console.log("geoqueries is almost empty");
+}
+
+function GeoClean(id)
+{
+		for(var i in geoqueries)
+		{
+			/*for(var j in badids)
+			{
+				if(geoqueries)
+			}*/
+
+			if(geoqueries[i].id == id)
+			{ 
+				
+				if(geoqueries.length > 1) geoqueries.splice(i, i+1);
+				//else GeoReset();
+			}
+		}
+
+	geoquery = true;
+	console.log("GeoClean: " + geoqueries.length);
 }
 
 //send results to client
@@ -287,7 +312,11 @@ function GeoToClient(id, data)
 	{
 		io.sockets.connected[id].emit('_QueryGeo', data); 
 	}
-	else console.log("can't send to client because client is not connected");
+	else
+	{ 
+		GeoClean(id);
+		console.log("can't send to client because client is not connected");
+	}
 
 	GeoReset();
 }
@@ -320,75 +349,88 @@ function GeoQuery()
 				}
 				else //if searchterm is not in db
 				{
-					//query OpenCage and add results to db //sometimes returns undefined for city
-					geocoder.geocode(geoqueries[0].place, function(err, res)
-					{ 
-						//console.log("response from geocoder");
+					geoquery = true;
 
-						if(!err) 
-						{
-							//if there are matches found
-							if(res.length > 0)
+					if(geoqueries.length > 0 && geoqueries[0].place && geoqueries[0].place != "" && geoqueries[0].place != null)
+					{
+						var gq = geoqueries[0];
+
+						//query OpenCage and add results to db //sometimes returns undefined for city
+						geocoder.geocode(gq.place, function(err, res)
+						{ 
+							//console.log("response from geocoder");
+
+							if(!err) 
 							{
-								var nocity = true;
-
-								//run through until you can...
-								for(var i in res)
+								//if there are matches found
+								if(res.length > 0)
 								{
-									//...make sure that you're giving a city and not just a region //***Continue to work with how this is defined.
-									//e.g.: Cape Town SA vs. Cape Town USA
-									if(res[i].city || res[i].state)
+									var nocity = true;
+
+									//run through until you can...
+									for(var i in res)
 									{
-										data.searchterm = geoqueries[0].place;
-										data.city = res[0].city;
-										data.territory = res[0].state;
-										data.country = res[0].country;
-										data.lt = res[0].latitude;
-										data.lg = res[0].longitude;
+										//...make sure that you're giving a city and not just a region //***Continue to work with how this is defined.
+										//e.g.: Cape Town SA vs. Cape Town USA
+										//if(res[i].city || res[i].state)
+										//{
+											data.searchterm = gq.place;
+											data.city = res[0].city;
+											data.territory = res[0].state;
+											data.country = res[0].country;
+											data.lt = res[0].latitude;
+											data.lg = res[0].longitude;
 
-										//inserts data if there is no existing item that matches query, otherwise just updates it
-										var dbquery = {searchterm: geoqueries[0].place, city: data.city, territory: data.territory, country: data.country};
-										GEO.update 
-										(
-											dbquery,
-											data,
-											{upsert: true}, 
-											function(err, result) 
-											{				
-												if (!err) console.log("updated / inserted " + data.city + " to DB");
-											}
-										);
+											//inserts data if there is no existing item that matches query, otherwise just updates it
+											var dbquery = {searchterm: gq.place, city: data.city, territory: data.territory, country: data.country};
+											GEO.update 
+											(
+												dbquery,
+												data,
+												{upsert: true}, 
+												function(err, result) 
+												{				
+													if (!err) console.log("updated / inserted " + data.city + " to DB");
+												}
+											);
 
-										data.addresses = geoqueries[0].addresses; //client's collection / edition addresses
+											data.addresses = gq.addresses; //client's collection / edition addresses
 
-										GeoToClient(id, data); //send results to client
+											GeoToClient(id, data); //send results to client
 
-										nocity = false;
-										break;
+											nocity = false;
+											break;
+										//}
 									}
-								}
 
-								if(nocity == true) GeoReset(); //***Develop a client response for no cities in OpenCage associated with search term
+									if(nocity == true) GeoReset(); //***Develop a client response for no cities in OpenCage associated with search term
+								}
+								else //if there are no geocodes associated with search term
+								{
+									var err = "OpenCage has no geocodes for" + gq.place + ". Sorry. :(";
+									data.addresses = gq.addresses;
+									data.err = err;
+									GeoToClient(id, data); //send results to client
+								}
 							}
-							else //if there are no geocodes associated with search term
+							else //if OpenCage has an error
 							{
-								var err = "OpenCage has no geocodes for " + geoqueries[0].place + ". Sorry. :(";
-								data.err = err;
+								console.log("open cage error: " + err + " place: " + gq.place);
+								data.err = err; //read errors on client side
 								GeoToClient(id, data); //send results to client
 							}
-						}
-						else //if OpenCage has an error
-						{
-							console.log(err);
-							data.err = err; //read errors on client side
-							GeoToClient(id, data); //send results to client
-						}
-					});
+						});
+					}
+					else
+					{ 
+						console.log("something is wrong with place");
+						GeoReset();
+					}
 				}
 		   	}
 	    	else //if MongoDB has an error
 	    	{	
-	    		console.log(err);
+	    		console.log("mongo error: " + err);
 	    		data.err = err; //read errors on client side
 	    		GeoToClient(id, data); //send results to client
 	    	}
@@ -412,6 +454,122 @@ setInterval(GeoQuery, 50); //arbitrary rate of repetition
 /*
 
 //OLD SOCKET FUNCTIONS
+
+//check db, if no results query OpenCage and then add results to db
+function GeoQuery()
+{	
+	//don't allow this code to be executed if we're still waiting for a response from the db.
+	if(geoquery == true && geoqueries.length > 0)
+	{
+		geoquery = false;
+		var id = geoqueries[0].id; //client's socket id number
+		var data = {}; //clients geo data
+
+		//Check db for existing geocodes //could give multiple results
+		GEO.find({searchterm: geoqueries[0].place}).toArray(function(err, docs) 
+		{	
+			if(!err)
+			{
+				if(docs.length > 0) //if docs are found
+				{	
+					data.addresses = geoqueries[0].addresses; //client's collection / edition addresses
+					data.city = docs[0].city;
+					data.territory = docs[0].territory;
+					data.country = docs[0].country;
+					data.lt = docs[0].lt;
+					data.lg = docs[0].lg;
+
+			    	GeoToClient(id, data); //send results to client
+				}
+				else //if searchterm is not in db
+				{
+					geoquery = true;
+
+					if(geoqueries.length > 0 && geoqueries[0].place && geoqueries[0].place != "" && geoqueries[0].place != null)
+					{
+						//query OpenCage and add results to db //sometimes returns undefined for city
+						geocoder.geocode(geoqueries[0].place, function(err, res)
+						{ 
+							//console.log("response from geocoder");
+
+							if(!err) 
+							{
+								//if there are matches found
+								if(res.length > 0)
+								{
+									var nocity = true;
+
+									//run through until you can...
+									for(var i in res)
+									{
+										//...make sure that you're giving a city and not just a region //***Continue to work with how this is defined.
+										//e.g.: Cape Town SA vs. Cape Town USA
+										if(res[i].city || res[i].state)
+										{
+											data.searchterm = geoqueries[0].place;
+											data.city = res[0].city;
+											data.territory = res[0].state;
+											data.country = res[0].country;
+											data.lt = res[0].latitude;
+											data.lg = res[0].longitude;
+
+											//inserts data if there is no existing item that matches query, otherwise just updates it
+											var dbquery = {searchterm: geoqueries[0].place, city: data.city, territory: data.territory, country: data.country};
+											GEO.update 
+											(
+												dbquery,
+												data,
+												{upsert: true}, 
+												function(err, result) 
+												{				
+													if (!err) console.log("updated / inserted " + data.city + " to DB");
+												}
+											);
+
+											data.addresses = geoqueries[0].addresses; //client's collection / edition addresses
+
+											GeoToClient(id, data); //send results to client
+
+											nocity = false;
+											break;
+										}
+									}
+
+									if(nocity == true) GeoReset(); //***Develop a client response for no cities in OpenCage associated with search term
+								}
+								else //if there are no geocodes associated with search term
+								{
+									var err = "OpenCage has no geocodes for X";// + geoqueries[0].place + ". Sorry. :(";
+									data.addresses = geoqueries[0].addresses;
+									data.err = err;
+									GeoToClient(id, data); //send results to client
+								}
+							}
+							else //if OpenCage has an error
+							{
+								console.log("open cage error: " + err);// + " place: " + geoqueries[0].place);
+								data.err = err; //read errors on client side
+								GeoToClient(id, data); //send results to client
+							}
+						});
+					}
+					else
+					{ 
+						console.log("something is wrong with place");
+						GeoReset();
+					}
+				}
+		   	}
+	    	else //if MongoDB has an error
+	    	{	
+	    		console.log("mongo error: " + err);
+	    		data.err = err; //read errors on client side
+	    		GeoToClient(id, data); //send results to client
+	    	}
+		});
+	}
+}
+setInterval(GeoQuery, 50); //arbitrary rate of repetition
 
 socket.on('SearchQueryInitiated', function(query)
 {

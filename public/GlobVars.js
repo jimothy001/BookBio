@@ -81,6 +81,12 @@ function GeoResponse(r)
 		var c = r.addresses[i].c;
 		var e = r.addresses[i].e;
 
-		collections[c].editions[e].UpdateGeo(r);
+		if(!r.err) collections[c].editions[e].UpdateGeo(r);
+		else
+		{
+			console.log("NoGeo from GeoResponse");
+			collections[c].editions[e].NoGeo();
+			//console.log("server error: " + r.err);
+		}
 	}
 }

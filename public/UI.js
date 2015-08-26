@@ -329,11 +329,17 @@ function Write()
 		var c = collections[i];
 
 		var data = ParseEditions(c.keys, c.editions);
-		
+		var data_ = ParseFaultyEditions(c.keys, c.editions);
+
 		var ws_name = c.name;
-		ws = SheetFrom2dArray(data);
+		var ws_name_ = c.name + " - needs cleaning";
+		var ws = SheetFrom2dArray(data);
+		var ws_ = SheetFrom2dArray(data_);
+
 		wb.SheetNames.push(ws_name);
+		wb.SheetNames.push(ws_name_);
 		wb.Sheets[ws_name] = ws;
+		wb.Sheets[ws_name_] = ws_;
 	}
 
 	SaveWorkbook(wb);
@@ -354,7 +360,7 @@ function SaveWorkbook(workbook)
 	}
 
 	/* the saveAs call downloads a file on the local machine */
-	saveAs(new Blob([s2ab(wbout)],{type:""}), "test.xlsx");
+	saveAs(new Blob([s2ab(wbout)],{type:""}), "collections.xlsx");
 }
 
 function Workbook() {
@@ -373,6 +379,31 @@ function ParseEditions(_keys, _editions)
 		var e = _editions[i];
 
 		if(e.active)
+		{
+			var d = [];
+
+			for(var j in e.data)
+			{
+				d.push(e.data[j]);
+			}
+
+			data.push(d);
+		}
+	}
+
+	return data;
+}
+
+function ParseFaultyEditions(_keys, _editions)
+{
+	var data = [];
+	data.push(_keys);
+
+	for(var i in _editions)
+	{
+		var e = _editions[i];
+
+		if(!e.active)
 		{
 			var d = [];
 
