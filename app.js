@@ -55,22 +55,23 @@ server.listen(process.env.PORT || 6789);
 
 
 var mongo = require('mongodb'),
-	  MongoServer = mongo.Server,
-	  Db = mongo.Db,
 	  ObjectID = mongo.ObjectID,
 	  uri = process.env.MONGOLAB_URI || 'localhost';
+	  // MongoServer = mongo.Server,
+	  // Db = mongo.Db,
 
 //.................open a connection to the mongodb server
-var mdbserver = new MongoServer(uri, 27017, {auto_reconnect: true});
+// var mdbserver = new MongoServer(uri, 27017, {auto_reconnect: true});
 //.................ask the server for the database named "DBASE" this databse will be created if it doesn't exist already
-var db = new Db('BBM', mdbserver,{safe:true});
+// var db = new Db('BBM', mdbserver,{safe:true});
 
 
 //.................get or create a collection in cubeDB to store objects
 //global variable that will be set to the object collection as soon as it is created or returned from the database
 var GEO=null;
 //.................open the database
-db.open(function(err, db) {
+mongo.MongoClient.connect(uri, function(err, db) {
+// db.open(function(err, db) {
   console.log('DB OPENING uri: ', uri)
   if(!err) {
   	//if all went well [that is mongoDB is alive and listening]
