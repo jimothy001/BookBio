@@ -71,6 +71,7 @@ var db = new Db('BBM', mdbserver,{safe:true});
 var GEO=null;
 //.................open the database
 db.open(function(err, db) {
+  console.log('DB OPENING uri: ', uri)
   if(!err) 
   {
   	//if all went well [that is mongoDB is alive and listening]
