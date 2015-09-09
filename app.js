@@ -72,8 +72,7 @@ var GEO=null;
 //.................open the database
 db.open(function(err, db) {
   console.log('DB OPENING uri: ', uri)
-  if(!err) 
-  {
+  if(!err) {
   	//if all went well [that is mongoDB is alive and listening]
     console.log("We are connected to mongoDB");
     //create a collection named theCollection and if it succeeds set the global variable theCollection to 
@@ -84,6 +83,8 @@ db.open(function(err, db) {
     	function(err, collection) {		//this function is called as soon as the databse has either found or created a collection with the requested name
     		GEO=collection;	//set the global variable theCollection to the newly found collection
     });
+  } else {
+  	console.log('ERROR WITH DB: ', err);
   }
 });
 
