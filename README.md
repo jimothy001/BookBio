@@ -1,7 +1,9 @@
 # The Book Biography Machine
 *Visualize, study, and discover the provenance of books*
+![screenshot](screencap.png)
 
 ## Local Development
+---
 
 ### Install Dependencies
 ```
@@ -20,12 +22,14 @@ Create a `.env` file and add the mongolab uri([?](http://docs.mongolab.com/conne
 ```
 uri = process.env.MONGOLAB_URI || 'localhost';
 ```
+then navigate to `http://localhost:5000`.
 
 ### Run it
 #### local
 ```
 node app.js
 ```
+then navigate to `http://localhost:6789`.
 
 #### remote
 ```
@@ -33,6 +37,7 @@ heroku local web
 ```
 
 ## Production 
+---
 To push your changes to the production server, merely run:
 ```
 git push heroku master
