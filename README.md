@@ -1,5 +1,5 @@
 # The Book Biography Machine
-#### Visualize, study, and discover the provenance of books
+*Visualize, study, and discover the provenance of books*
 
 ## Local Development
 
@@ -10,19 +10,19 @@ npm install
 
 ### Spin up Mongo
 You can either do this using a local mongo instance or the remote one.
-#### locally:
+#### local
 ```
 mongod &
 ```
 
-#### remote:
+#### remote
 Create a `.env` file and add the mongolab uri([?](http://docs.mongolab.com/connecting/#connect-string)). This is a local environment variables file that contains sensitive information; thus `.env` is not to be tracked remotely. If you've set this up properly you won't need to run anything else. The following line in `app.js` will automatically determine which instance of mongo to run.
 ```
 uri = process.env.MONGOLAB_URI || 'localhost';
 ```
 
 ### Run it
-#### locally:
+#### local
 ```
 node app.js
 ```
