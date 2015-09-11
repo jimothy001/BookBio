@@ -3,6 +3,7 @@
 ![screenshot](screencap.png)
 
 ## Local Development
+---
 
 ### Install Dependencies
 ```
@@ -36,6 +37,7 @@ heroku local web
 ```
 
 ## Production 
+---
 To push your changes to the production server, merely run:
 ```
 git push heroku master
