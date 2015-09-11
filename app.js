@@ -53,7 +53,6 @@ server.listen(process.env.PORT || 6789);
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
 var mongo = require('mongodb'),
 	  ObjectID = mongo.ObjectID,
 	  uri = process.env.MONGOLAB_URI || 'localhost';
@@ -70,23 +69,30 @@ var mongo = require('mongodb'),
 //global variable that will be set to the object collection as soon as it is created or returned from the database
 var GEO=null;
 //.................open the database
+console.log('uri ', uri);
 mongo.MongoClient.connect(uri, function(err, db) {
+	db.createCollection(
+		'GEO', 				//name of collection to open
+		{safe:false}, 					//unsafe mode, if the collection already exists just give us the existing one
+		function(err, collection) {		//this function is called as soon as the databse has either found or created a collection with the requested name
+			GEO=collection;	//set the global variable theCollection to the newly found collection
+	});
 // db.open(function(err, db) {
-  console.log('DB OPENING uri: ', uri)
-  if(!err) {
-  	//if all went well [that is mongoDB is alive and listening]
-    console.log("We are connected to mongoDB");
-    //create a collection named theCollection and if it succeeds set the global variable theCollection to 
-    //point to the newly created or opened collection
-    db.createCollection(
-    	'GEO', 				//name of collection to open
-    	{safe:false}, 					//unsafe mode, if the collection already exists just give us the existing one
-    	function(err, collection) {		//this function is called as soon as the databse has either found or created a collection with the requested name
-    		GEO=collection;	//set the global variable theCollection to the newly found collection
-    });
-  } else {
-  	console.log('ERROR WITH DB: ', err);
-  }
+  // console.log('DB OPENING uri: ', uri)
+  // if(!err) {
+  // 	//if all went well [that is mongoDB is alive and listening]
+  //   console.log("We are connected to mongoDB");
+  //   //create a collection named theCollection and if it succeeds set the global variable theCollection to 
+  //   //point to the newly created or opened collection
+  //   db.createCollection(
+  //   	'GEO', 				//name of collection to open
+  //   	{safe:false}, 					//unsafe mode, if the collection already exists just give us the existing one
+  //   	function(err, collection) {		//this function is called as soon as the databse has either found or created a collection with the requested name
+  //   		GEO=collection;	//set the global variable theCollection to the newly found collection
+  //   });
+  // } else {
+  // 	console.log('ERROR WITH DB: ', err);
+  // }
 });
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
